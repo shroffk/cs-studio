@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Fault
+Bundle-SymbolicName: org.csstudio.logbook.olog.property.fault;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.csstudio.logbook.olog.property.fault.Activator
+Bundle-Vendor: NSLSII
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.csstudio.ui.util,
+ org.eclipse.e4.core.di.extensions,
+ org.csstudio.apputil.ui
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .

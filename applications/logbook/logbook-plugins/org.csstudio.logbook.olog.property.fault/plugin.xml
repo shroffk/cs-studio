@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="org.csstudio.logbook.ui.toolbar">
+            <command
+                  commandId="org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog"
+                  icon="icons/fault-16.png"
+                  label="Create Fault Report"
+                  style="push">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog"
+            id="org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog"
+            name="Create Fault Report">
+      </command>
+   </extension>
+
+</plugin>
