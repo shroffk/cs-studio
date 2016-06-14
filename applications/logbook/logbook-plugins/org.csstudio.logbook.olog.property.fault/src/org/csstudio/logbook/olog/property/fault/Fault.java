@@ -4,32 +4,32 @@ import java.time.Instant;
 
 public class Fault {
 
-    int id;
-    String area;
-    String subsystem;
-    String device;
+    private int id;
+    private String area;
+    private String subsystem;
+    private String device;
 
-    String description;
+    private String description;
 
-    String assigned;
+    private String assigned;
 
-    String contact;
+    private String contact;
 
-    Instant faultOccuredTime;
-    Instant faultClearedTime;
+    private Instant faultOccuredTime;
+    private Instant faultClearedTime;
 
     public enum BeamLossState {
         True, False, Studies
     };
 
-    BeamLossState beamLossState;
+    private BeamLossState beamLossState;
 
-    Instant beamlostTime;
-    Instant beamRestoredTime;
+    private Instant beamlostTime;
+    private Instant beamRestoredTime;
 
-    String rootCause;
-    String repairAction;
-    String correctiveAction;
+    private String rootCause;
+    private String repairAction;
+    private String correctiveAction;
 
     public Fault(String description) {
         this.description = description;

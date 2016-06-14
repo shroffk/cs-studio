@@ -325,6 +325,7 @@ public class FaultEditorWidget extends Composite {
             public void keyReleased(KeyEvent e) {
                 if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR) {
                     // TODO
+                    
                 }
             }
         });
@@ -400,7 +401,9 @@ public class FaultEditorWidget extends Composite {
         comboBeamLossStatus.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                switch (comboBeamLossStatus.getItem(comboBeamLossStatus.getSelectionIndex())) {
+                String selection = comboBeamLossStatus.getItem(comboBeamLossStatus.getSelectionIndex());
+                fault.setBeamLossState(BeamLossState.valueOf(selection));
+                switch (selection) {
                 case "True":
                     btnBeamLossTime.setEnabled(true);
                     textBeamLossStart.setEnabled(true);

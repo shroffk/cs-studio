@@ -68,6 +68,13 @@ public class LogEntryUtil {
         return propertyNames;
     }
 
+    /**
+     * Return the property with the given propertyName if present else return null
+     * 
+     * @param logEntry
+     * @param PropertyName
+     * @return
+     */
     public static Property getProperty(LogEntry logEntry, String PropertyName){
         for (Property property : logEntry.getProperties()) {
             if(property.getName().equalsIgnoreCase(PropertyName)){
