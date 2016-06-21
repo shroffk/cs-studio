@@ -62,5 +62,14 @@
             name="Create Fault Report">
       </command>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.csstudio.logbook.olog.property.fault.FaultViewer"
+            id="org.csstudio.logbook.olog.property.fault.viewer"
+            name="Fault View"
+            restorable="true">
+      </view>
+   </extension>
 
 </plugin>
