@@ -4,9 +4,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.csstudio.email.EMailSender;
+import org.csstudio.email.Preferences;
 import org.csstudio.logbook.LogEntry;
 import org.csstudio.logbook.LogEntryBuilder;
 import org.csstudio.logbook.Logbook;
@@ -35,7 +40,8 @@ import static org.csstudio.logbook.TagBuilder.*;
 
 public class FaultEditorDialog extends Dialog {
     
-
+    private static final Logger log = Logger.getLogger(FaultEditorDialog.class.getCanonicalName());
+    
     private LogbookClient client;
     private List<String> tags = Collections.emptyList();
     private List<String> logbooks = Collections.emptyList();
@@ -46,6 +52,7 @@ public class FaultEditorDialog extends Dialog {
     
     protected FaultEditorDialog(Shell parentShell, List<LogEntry> data) {
         super(parentShell);
+        setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE);
         this.data = data;
         //TODO This needs to be moved to another thread.
         if (client == null) {
@@ -127,6 +134,23 @@ public class FaultEditorDialog extends Dialog {
                         .setTags(newTags)
                         .addTag(tag("Fault"))
                         .addProperty(prop).build());
+                // Since this is a new Fault inform the contactee
+                Executors.newSingleThreadExecutor().execute(() -> {
+                    if (Platform.getPreferencesService().getBoolean("org.csstudio.logbook.olog.property.fault",
+                            "notify", true, null)) {
+                        if (fault.getContact() != null && !fault.getContact().isEmpty()) {
+                            EMailSender mailer;
+                            try {
+                                mailer = new EMailSender(Preferences.getSMTP_Host(), "cs-studio@bnl.gov",
+                                        fault.getContact(), "Fault Report");
+                                mailer.addText(faultText);
+                                mailer.close();
+                            } catch (Exception e) {
+                                log.log(Level.WARNING, "Failed to send fault message", e);
+                            }
+                        }
+                    }
+                });
             } else {
                 client.updateLogEntry(LogEntryBuilder
                         .logEntry(data.get(0))
