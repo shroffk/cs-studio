@@ -130,6 +130,10 @@
                </with>
             </visibleWhen>
          </command>
+         <separator
+               name="org.csstudio.logbook.ui.separator"
+               visible="true">
+         </separator>
       </menuContribution>
       <menuContribution
             allPopups="false"

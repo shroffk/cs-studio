@@ -1,6 +1,8 @@
 package org.csstudio.logbook.olog.property.fault;
 
 import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
 
 public class Fault {
 
@@ -30,6 +32,9 @@ public class Fault {
     private String rootCause;
     private String repairAction;
     private String correctiveAction;
+    
+    // list of associated logs
+    private List<Integer> logIds = Collections.emptyList();
 
     public Fault(String description) {
         this.description = description;
@@ -38,7 +43,7 @@ public class Fault {
     public Fault(int id, String area, String subsystem, String device, String description, String assigned,
             String contact, Instant faultOccuredTime, Instant faultClearedTime, BeamLossState beamLossState,
             Instant beamlostTime, Instant beamRestoredTime, String rootCause, String repairAction,
-            String correctiveAction) {
+            String correctiveAction, List<Integer> logIds) {
         super();
         this.id = id;
         this.area = area;
@@ -55,6 +60,7 @@ public class Fault {
         this.rootCause = rootCause;
         this.repairAction = repairAction;
         this.correctiveAction = correctiveAction;
+        this.logIds = logIds;
     }
 
     public Fault() {
@@ -119,6 +125,10 @@ public class Fault {
     public String getCorrectiveAction() {
         return correctiveAction;
     }
+    
+    public List<Integer> getLogIds() {
+        return Collections.unmodifiableList(logIds);
+    }
 
     public void setId(int id) {
         this.id = id;
@@ -178,6 +188,10 @@ public class Fault {
 
     public void setCorrectiveAction(String correctiveAction) {
         this.correctiveAction = correctiveAction;
+    }
+    
+    public void setLogIds(List<Integer> logIds){
+        this.logIds = Collections.unmodifiableList(logIds);
     }
 
 }

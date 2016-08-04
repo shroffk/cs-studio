@@ -1,6 +1,9 @@
 package org.csstudio.logbook.olog.property.fault;
 
-import java.util.Arrays;
+import static org.csstudio.logbook.LogbookBuilder.logbook;
+import static org.csstudio.logbook.TagBuilder.tag;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +21,6 @@ import org.csstudio.logbook.Logbook;
 import org.csstudio.logbook.LogbookBuilder;
 import org.csstudio.logbook.LogbookClient;
 import org.csstudio.logbook.LogbookClientManager;
-import org.csstudio.logbook.Property;
 import org.csstudio.logbook.PropertyBuilder;
 import org.csstudio.logbook.Tag;
 import org.csstudio.logbook.TagBuilder;
@@ -35,9 +37,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import static org.csstudio.logbook.LogEntryBuilder.*;
-import static org.csstudio.logbook.TagBuilder.*;
-
+/**
+ * A dialog to create a new Fault Entry
+ * 
+ * @author Kunal Shroff
+ *
+ */
 public class FaultEditorDialog extends Dialog {
     
     private static final Logger log = Logger.getLogger(FaultEditorDialog.class.getCanonicalName());
@@ -45,25 +50,56 @@ public class FaultEditorDialog extends Dialog {
     private LogbookClient client;
     private List<String> tags = Collections.emptyList();
     private List<String> logbooks = Collections.emptyList();
-    private List<LogEntry> data;
+
+    private final boolean create;
+    private List<Integer> logEntries;
+    private Fault fault;
+    private LogEntry faultLog;
     
     private FaultEditorWidget faultEditorWidget;
-    private String level;
     
-    protected FaultEditorDialog(Shell parentShell, List<LogEntry> data) {
+    private String faultLevel;
+    private TagBuilder faultTag;
+    private LogbookBuilder faultLogbook;
+    
+
+    /** 
+     * 
+     * @param parentShell parent shell
+     * @param create specify if you are creating of updating a fault
+     * @param fault the fault with which to initialize the dialog
+     * @param faultLog the log entry which the fault maps to
+     * @param associatedLogEntries the log entries assigned to this fault
+     */
+    protected FaultEditorDialog(Shell parentShell, boolean create, Fault fault, LogEntry faultLog, List<Integer> associatedLogEntries) {
         super(parentShell);
-        setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE);
-        this.data = data;
-        //TODO This needs to be moved to another thread.
+        setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
+
+        this.create = create;
+        this.fault = fault;
+        this.faultLog = faultLog;
+        this.logEntries = associatedLogEntries;
+
         if (client == null) {
             try {
                 client = LogbookClientManager.getLogbookClientFactory().getClient();
                 tags = client.listTags().stream().map(Tag::getName).collect(Collectors.toList());
                 logbooks = client.listLogbooks().stream().map(Logbook::getName).collect(Collectors.toList());
-                level = Platform.getPreferencesService().getString(
+                
+                faultLevel = Platform.getPreferencesService().getString(
                         "org.csstudio.logbook.olog.property.fault", "fault.level",
                         "Problem",
                         null);
+                String faultTagName = Platform.getPreferencesService()
+                        .getString("org.csstudio.logbook.olog.property.fault", "fault.tag", "Fault", null);
+                if (tags.contains(faultTagName)) {
+                    faultTag = tag(faultTagName);
+                }
+                String faultLogbookName = Platform.getPreferencesService()
+                        .getString("org.csstudio.logbook.olog.property.fault", "fault.logbook", "Operations", null);
+                if (logbooks.contains(faultLogbookName)) {
+                    faultLogbook = logbook(faultLogbookName);
+                }
             } catch (Exception e) {
                 Status status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Failed to open fault dialog", e);
                 ErrorDialog.openError(parentShell, "Failed to open fault dialog",
@@ -74,29 +110,33 @@ public class FaultEditorDialog extends Dialog {
 
     @Override
     protected Control createDialogArea(Composite parent) {
-        getShell().setText("Create Fault Report");
+        if (create) {
+            getShell().setText("Create a Fault Report");
+        } else {
+            getShell().setText("Update Fault Report");
+        }
+        
         Composite container = (Composite) super.createDialogArea(parent);
         container.setLayout(new FillLayout(SWT.HORIZONTAL));
+        
         FaultConfiguration fc = FaultConfigurationFactory.getConfiguration();
+        
         faultEditorWidget = new FaultEditorWidget(container, SWT.NONE, fc, logbooks, tags);
-        if(data == null || data.isEmpty()){
-            
-        } else if(data.size() == 1 && LogEntryUtil.getProperty(data.get(0), FaultAdapter.FAULT_PROPERTY_NAME) != null){
-            Property faultProperty = LogEntryUtil.getProperty(data.get(0), FaultAdapter.FAULT_PROPERTY_NAME);
-            faultEditorWidget.setFault(FaultAdapter.extractFaultFromLogEntry(data.get(0)));
-            if (faultProperty.getAttributeNames().contains(FaultAdapter.FAULT_PROPERTY_ATTR_LOGIDS)) {
-                faultEditorWidget.setLogIds(Arrays
-                        .asList(faultProperty.getAttributeValue(FaultAdapter.FAULT_PROPERTY_ATTR_LOGIDS).split(";")));
+        if(create){
+            // Create a brand new fault entry
+            if(logEntries != null && !logEntries.isEmpty()) {
+                faultEditorWidget.setLogIds(logEntries);
             }
-            faultEditorWidget.setLogbooks(LogEntryUtil.getLogbookNames(data.get(0)));
-            faultEditorWidget.setTags(LogEntryUtil.getTagNames(data.get(0)));
-        } else {
-            faultEditorWidget.setLogIds(data.stream().map(new Function<LogEntry, String>() {
-                @Override
-                public String apply(LogEntry logEntry) {
-                    return String.valueOf(logEntry.getId()); 
-                }
-            }).collect(Collectors.toList()));
+        }else{
+            // Update existing fault report
+            if(fault != null) {
+                faultEditorWidget.setFault(fault);
+            }
+
+            if (faultLogbook != null) {
+                faultEditorWidget.setLogbooks(LogEntryUtil.getLogbookNames(faultLog));
+                faultEditorWidget.setTags(LogEntryUtil.getTagNames(faultLog));
+            }
         }
         return container;
     }
@@ -112,28 +152,33 @@ public class FaultEditorDialog extends Dialog {
     protected void okPressed() {
         // Create the fault report
         Fault fault = faultEditorWidget.getFault();
-
         String faultText = FaultAdapter.createFaultText(fault);
 
         Collection<LogbookBuilder> newLogbooks = faultEditorWidget.getLogbooks().stream().map((logbookName) -> {
             return LogbookBuilder.logbook(logbookName);
         }).collect(Collectors.toList());
+        if (!faultEditorWidget.getLogbooks().contains(faultLogbook)) {
+            newLogbooks.add(faultLogbook);
+        }
 
         Collection<TagBuilder> newTags = faultEditorWidget.getTags().stream().map((tagName) -> {
             return TagBuilder.tag(tagName);
         }).collect(Collectors.toList());
+        if (!faultEditorWidget.getTags().contains(faultTag)) {
+            newTags.add(faultTag);
+        }
 
         PropertyBuilder prop = FaultAdapter.createFaultProperty(fault, faultEditorWidget.getLogIds());
 
         try {
-            if (fault.getId() == 0) {
+            
+            if (create) {
                 client.createLogEntry(LogEntryBuilder
                         .withText(faultText)
-                        .setLevel(level)
+                        .setLevel(faultLevel)
                         .setLogbooks(newLogbooks)
-                        .setTags(newTags)
-                        .addTag(tag("Fault"))
-                        .addProperty(prop).build());
+                        .addProperty(prop)
+                        .build());
                 // Since this is a new Fault inform the contactee
                 Executors.newSingleThreadExecutor().execute(() -> {
                     if (Platform.getPreferencesService().getBoolean("org.csstudio.logbook.olog.property.fault",
@@ -153,12 +198,11 @@ public class FaultEditorDialog extends Dialog {
                 });
             } else {
                 client.updateLogEntry(LogEntryBuilder
-                        .logEntry(data.get(0))
+                        .logEntry(faultLog)
                         .setText(faultText)
-                        .setLevel(level)
+                        .setLevel(faultLevel)
                         .setLogbooks(newLogbooks)
                         .setTags(newTags)
-                        .addTag(tag("Fault"))
                         .addProperty(prop)
                         .build());
             }

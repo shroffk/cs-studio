@@ -8,7 +8,7 @@
          <toolbar
                id="org.csstudio.logbook.ui.toolbar">
             <command
-                  commandId="org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog"
+                  commandId="org.csstudio.logbook.olog.property.fault.OpenNewFaultDialog"
                   icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-16.png"
                   label="Create New Fault Report"
                   style="push">
@@ -17,9 +17,9 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:utility">
+            locationURI="menu:utility?after=additions">
          <command
-               commandId="org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog"
+               commandId="org.csstudio.logbook.olog.property.fault.OpenNewFaultDialog"
                icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-16.png"
                label="Create New Fault Report"
                style="push">
@@ -27,11 +27,11 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="popup:org.eclipse.ui.popup.any">
+            locationURI="popup:org.eclipse.ui.popup.any?after=org.csstudio.logbook.ui.separator">
          <command
-               commandId="org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog"
+               commandId="org.csstudio.logbook.olog.property.fault.OpenNewFaultDialog"
                icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-16.png"
-               label="Fault Report"
+               label="Create Fault Report"
                style="push">
             <visibleWhen>
                <with
@@ -52,14 +52,51 @@
                </with>
             </visibleWhen>
          </command>
+         <command
+               commandId="org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog"
+               icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-16.png"
+               label="Update Fault Report"
+               style="push">
+            <visibleWhen>
+               <with
+                     variable="activeMenuSelection">
+                  <and>
+                     <iterate>
+                        <adapt
+                              type="org.csstudio.logbook.olog.property.fault.Fault">
+                        </adapt>
+                     </iterate>
+                     <with
+                           variable="activeMenuSelection">
+                        <count
+                              value="1">
+                        </count>
+                     </with>
+                  </and>
+               </with>
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.csstudio.logbook.olog.property.fault.separator">
+         </separator>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            class="org.csstudio.logbook.olog.property.fault.FaultCommands"
+            locationURI="popup:org.eclipse.ui.popup.any?after=org.csstudio.logbook.olog.property.fault.separator">
       </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
+            defaultHandler="org.csstudio.logbook.olog.property.fault.OpenNewFaultDialog"
+            id="org.csstudio.logbook.olog.property.fault.OpenNewFaultDialog"
+            name="Create Fault Report">
+      </command>
+      <command
             defaultHandler="org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog"
             id="org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog"
-            name="Create Fault Report">
+            name="Update Fault Report">
       </command>
    </extension>
    <extension
@@ -70,6 +107,16 @@
             name="Fault View"
             restorable="true">
       </view>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.csstudio.logbook.LogEntry"
+            class="org.csstudio.logbook.olog.property.fault.FaultAdapter">
+         <adapter
+               type="org.csstudio.logbook.olog.property.fault.Fault">
+         </adapter>
+      </factory>
    </extension>
 
 </plugin>

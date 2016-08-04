@@ -90,7 +90,9 @@ public class CreateFaultViewerWidgetDemo extends ApplicationWindow {
                 faultViewWidget.setFault(fault);
                 try {
                     List<LogEntry> logs = new ArrayList<LogEntry>();
-                    logs.add(LogEntryBuilder.withText("test").attach(AttachmentBuilder.attachment("resources/opi.png")
+                    logs.add(LogEntryBuilder.withText("First test log entry").attach(AttachmentBuilder.attachment("resources/opi.png")
+                            .inputStream(new FileInputStream("resources/opi.png"))).build());
+                    logs.add(LogEntryBuilder.withText("Second test log entry").attach(AttachmentBuilder.attachment("resources/opi.png")
                             .inputStream(new FileInputStream("resources/opi.png"))).build());
                     faultViewWidget.setLogEntries(logs);
                 } catch (Exception e1) {

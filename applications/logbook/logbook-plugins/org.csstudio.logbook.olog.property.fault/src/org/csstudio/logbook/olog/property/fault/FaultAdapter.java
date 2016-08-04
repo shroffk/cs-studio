@@ -1,23 +1,34 @@
 package org.csstudio.logbook.olog.property.fault;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Optional;
 
 import org.csstudio.logbook.LogEntry;
 import org.csstudio.logbook.Property;
 import org.csstudio.logbook.PropertyBuilder;
 import org.csstudio.logbook.olog.property.fault.Fault.BeamLossState;
+import org.csstudio.logbook.ui.util.UpdateLogEntryBuilder;
+import org.csstudio.logbook.util.LogEntryUtil;
+import org.eclipse.core.runtime.IAdapterFactory;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.e4.compatibility.SelectionService;
 
 /**
  * 
  * @author Kunal Shroff
  *
  */
-public class FaultAdapter {
+public class FaultAdapter implements IAdapterFactory{
 
     public static final String FAULT_PROPERTY_NAME = "fault";
 
@@ -44,9 +55,9 @@ public class FaultAdapter {
      * A utility method that helps convert the input from the the
      * faultEditorWidget into a logbook property
      * 
-     * @param fault
-     * @param list
-     * @return
+     * @param fault to be converted to the {@link PropertyBuilder}
+     * @param list of log entries to be added to this fault
+     * @return PropertyBuilder representing this fault
      */
     public static PropertyBuilder createFaultProperty(Fault fault, List<String> list) {
         PropertyBuilder pb = PropertyBuilder.property(FAULT_PROPERTY_NAME);
@@ -74,6 +85,42 @@ public class FaultAdapter {
             pb.attribute(FAULT_PROPERTY_ATTR_LOGIDS, String.join(";", list));
         return pb;
     }
+    
+    /**
+     * A utility method that helps convert the input from the the
+     * faultEditorWidget into a logbook property
+     * 
+     * @param fault to be converted to the {@link PropertyBuilder}
+     * @return PropertyBuilder for the given fault
+     */
+    public static PropertyBuilder createFaultProperty(Fault fault) {
+        PropertyBuilder pb = PropertyBuilder.property(FAULT_PROPERTY_NAME);
+        if (fault.getArea() != null && !fault.getArea().isEmpty())
+            pb.attribute(FAULT_PROPERTY_ATTR_AREA, fault.getArea());
+        if (fault.getSubsystem() != null && !fault.getSubsystem().isEmpty())
+            pb.attribute(FAULT_PROPERTY_ATTR_SYSTEM, fault.getSubsystem());
+        if (fault.getDevice() != null && !fault.getDevice().isEmpty())
+            pb.attribute(FAULT_PROPERTY_ATTR_DEVICE, fault.getDevice());
+        if (fault.getAssigned() != null && !fault.getAssigned().isEmpty())
+            pb.attribute(FAULT_PROPERTY_ATTR_ASSIGNED, fault.getAssigned());
+        if (fault.getContact() != null && !fault.getContact().isEmpty())
+            pb.attribute(FAULT_PROPERTY_ATTR_CONTACT, fault.getContact());
+        if (fault.getFaultOccuredTime() != null)
+            pb.attribute(FAULT_PROPERTY_ATTR_TOCCOURED, fault.getFaultOccuredTime().toString());
+        if (fault.getFaultClearedTime() != null)
+            pb.attribute(FAULT_PROPERTY_ATTR_TCLEARED, fault.getFaultClearedTime().toString());
+        if (fault.getBeamLossState() != null)
+            pb.attribute(FAULT_PROPERTY_ATTR_LOST_STATE, fault.getBeamLossState().toString());
+        if (fault.getBeamlostTime() != null)
+            pb.attribute(FAULT_PROPERTY_ATTR_TLOST, fault.getBeamlostTime().toString());
+        if (fault.getBeamRestoredTime() != null)
+            pb.attribute(FAULT_PROPERTY_ATTR_TRESTORED, fault.getBeamRestoredTime().toString());
+        if (fault.getLogIds().isEmpty())
+            pb.attribute(FAULT_PROPERTY_ATTR_LOGIDS, String.join(";",
+                    fault.getLogIds().stream().sorted().map(String::valueOf).collect(Collectors.toList())));
+        return pb;
+    }
+
 
     /**
      * A utility method for creating a single log entry text from the various
@@ -196,6 +243,10 @@ public class FaultAdapter {
                 case FAULT_PROPERTY_ATTR_TRESTORED:
                     fault.setBeamRestoredTime(ZonedDateTime.parse(attribute.getValue()).toInstant());
                     break;
+                case FAULT_PROPERTY_ATTR_LOGIDS:
+                    fault.setLogIds(Arrays.asList(attribute.getValue().split(";")).stream().map(Integer::valueOf)
+                            .collect(Collectors.toList()));
+                    break;
                 default:
                     break;
                 }
@@ -205,6 +256,21 @@ public class FaultAdapter {
             throw new IllegalArgumentException(
                     "The given log entry does not have a fault property and cannot be converted.");
         }
+    }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object getAdapter(Object adaptableObject, Class adapterType) {
+        if(adapterType == Fault.class){
+            LogEntry logEntry = (LogEntry)adaptableObject;
+            Fault fault = FaultAdapter.extractFaultFromLogEntry(logEntry);
+            return fault;
+        }
+        return null;
+    }
+
+    @Override
+    public Class<?>[] getAdapterList() {
+        return new Class[] { Fault.class };
     }
 }

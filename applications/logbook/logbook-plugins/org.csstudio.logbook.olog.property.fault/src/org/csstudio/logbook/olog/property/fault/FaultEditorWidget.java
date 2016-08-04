@@ -1,6 +1,12 @@
 package org.csstudio.logbook.olog.property.fault;
 
+import java.awt.Color;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -37,8 +43,11 @@ import org.eclipse.swt.widgets.Text;
 
 public class FaultEditorWidget extends Composite {
 
-    // general information
 
+    private Composite composite;
+    
+    // general information
+    
     private Label lblFaultId;
     private Label lblFaultID;
     private Text text;
@@ -87,6 +96,9 @@ public class FaultEditorWidget extends Composite {
     private MultipleSelectionCombo<String> multiSelectionComboLogbook;
     private MultipleSelectionCombo<String> multiSelectionComboTag;
 
+    private org.eclipse.swt.graphics.Color redColor;
+    private org.eclipse.swt.graphics.Color defaultColor;
+
     // Configuration information
     private final FaultConfiguration fc;
     private final List<String> availableLogbooks;
@@ -95,6 +107,8 @@ public class FaultEditorWidget extends Composite {
     public FaultEditorWidget(Composite parent, int style, FaultConfiguration fc, List<String> availableLogbooks,
             List<String> availableTags) {
         super(parent, style);
+        redColor = Display.getCurrent().getSystemColor(SWT.COLOR_RED);
+        defaultColor = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
         
         this.fc = fc;
         this.availableLogbooks = availableLogbooks;
@@ -294,7 +308,9 @@ public class FaultEditorWidget extends Composite {
                                     dialog.setBlockOnOpen(true);
                                     if (dialog.open() == IDialogConstants.OK_ID) {
                                         fault.setFaultOccuredTime(dialog.getDateTime().toInstant());
-                                        textTimeOccoured.setText(dialog.getDateTime().toInstant().toString());
+                                        textTimeOccoured.setText(ZonedDateTime
+                                                .ofInstant(dialog.getDateTime().toInstant(), ZoneId.systemDefault())
+                                                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                                     }
                                 }
                             });
@@ -323,12 +339,16 @@ public class FaultEditorWidget extends Composite {
         textTimeOccoured.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR) {
-                    // TODO
-                    
+                try {
+                    Instant i = LocalDateTime.parse(textTimeOccoured.getText()).atZone(ZoneId.systemDefault()).toInstant();
+                    textTimeOccoured.setForeground(defaultColor);
+                    fault.setFaultOccuredTime(i);
+                } catch (Exception e1) {
+                    textTimeOccoured.setForeground(redColor);
                 }
             }
         });
+        textTimeOccoured.setToolTipText("example: 2014-11-01T22:07:24");
         FormData fd_text_1 = new FormData();
         fd_text_1.right = new FormAttachment(btnTimeOccoured);
         fd_text_1.top = new FormAttachment(0);
@@ -358,7 +378,9 @@ public class FaultEditorWidget extends Composite {
                                     dialog.setBlockOnOpen(true);
                                     if (dialog.open() == IDialogConstants.OK_ID) {
                                         fault.setFaultClearedTime(dialog.getDateTime().toInstant());
-                                        textTimeCleared.setText(dialog.getDateTime().toInstant().toString());
+                                        textTimeCleared.setText(ZonedDateTime
+                                                .ofInstant(dialog.getDateTime().toInstant(), ZoneId.systemDefault())
+                                                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                                     }
                                 }
                             });
@@ -384,6 +406,19 @@ public class FaultEditorWidget extends Composite {
         btnTimeCleared.setText("...");
 
         textTimeCleared = new Text(grpTimeInfo, SWT.BORDER);
+        textTimeCleared.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                try {
+                    Instant i = LocalDateTime.parse(textTimeCleared.getText()).atZone(ZoneId.systemDefault()).toInstant();
+                    textTimeCleared.setForeground(defaultColor);
+                    fault.setFaultClearedTime(i);
+                } catch (Exception e1) {
+                    textTimeCleared.setForeground(redColor);
+                }
+            }
+        });
+        textTimeCleared.setToolTipText("example: 2014-11-01T22:07:24");
         FormData fd_text_2 = new FormData();
         fd_text_2.left = new FormAttachment(lblTimeCleared, 4);
         fd_text_2.right = new FormAttachment(btnTimeCleared);
@@ -448,7 +483,9 @@ public class FaultEditorWidget extends Composite {
                                     dialog.setBlockOnOpen(true);
                                     if (dialog.open() == IDialogConstants.OK_ID) {
                                         fault.setBeamlostTime(dialog.getDateTime().toInstant());
-                                        textBeamLossStart.setText(dialog.getDateTime().toInstant().toString());
+                                        textBeamLossStart.setText(ZonedDateTime
+                                                .ofInstant(dialog.getDateTime().toInstant(), ZoneId.systemDefault())
+                                                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                                     }
                                 }
                             });
@@ -474,6 +511,19 @@ public class FaultEditorWidget extends Composite {
         btnBeamLossTime.setText("...");
 
         textBeamLossStart = new Text(grpTimeInfo, SWT.BORDER);
+        textBeamLossStart.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                try {
+                    Instant i = LocalDateTime.parse(textBeamLossStart.getText()).atZone(ZoneId.systemDefault()).toInstant();
+                    textBeamLossStart.setForeground(defaultColor);
+                    fault.setBeamlostTime(i);
+                } catch (Exception e1) {
+                    textBeamLossStart.setForeground(redColor);
+                }
+            }
+        });
+        textBeamLossStart.setToolTipText("example: 2014-11-01T22:07:24");
         FormData fd_textBeamLossStart = new FormData();
         fd_textBeamLossStart.top = new FormAttachment(textTimeOccoured, 32);
         fd_textBeamLossStart.right = new FormAttachment(btnBeamLossTime);
@@ -503,7 +553,9 @@ public class FaultEditorWidget extends Composite {
                                     dialog.setBlockOnOpen(true);
                                     if (dialog.open() == IDialogConstants.OK_ID) {
                                         fault.setBeamRestoredTime(dialog.getDateTime().toInstant());
-                                        textBeamRestoredTime.setText(dialog.getDateTime().toInstant().toString());
+                                        textBeamRestoredTime.setText(ZonedDateTime
+                                                .ofInstant(dialog.getDateTime().toInstant(), ZoneId.systemDefault())
+                                                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                                     }
                                 }
                             });
@@ -529,6 +581,19 @@ public class FaultEditorWidget extends Composite {
         btnBeamRestoredTime.setText("...");
 
         textBeamRestoredTime = new Text(grpTimeInfo, SWT.BORDER);
+        textBeamRestoredTime.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                try {
+                    Instant i = LocalDateTime.parse(textBeamRestoredTime.getText()).atZone(ZoneId.systemDefault()).toInstant();
+                    textBeamRestoredTime.setForeground(defaultColor);
+                    fault.setBeamRestoredTime(i);
+                } catch (Exception e1) {
+                    textBeamRestoredTime.setForeground(redColor);
+                }
+            }
+        });
+        textBeamRestoredTime.setToolTipText("example: 2014-11-01T22:07:24");
         FormData fd_textBeamRestoredTime = new FormData();
         fd_textBeamRestoredTime.top = new FormAttachment(textBeamLossStart, 0, SWT.TOP);
         fd_textBeamRestoredTime.right = new FormAttachment(btnBeamRestoredTime);
@@ -616,6 +681,13 @@ public class FaultEditorWidget extends Composite {
         grpLogs.setLayoutData(fd_grpLogs);
 
         textLogIds = new Text(grpLogs, SWT.BORDER);
+        textLogIds.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                fault.setLogIds(Arrays.asList(textLogIds.getText().split(";")).stream().map(Integer::valueOf)
+                        .collect(Collectors.toList())); 
+            }
+        });
         FormData fd_textLogIds = new FormData();
         fd_textLogIds.right = new FormAttachment(100, -6);
         fd_textLogIds.top = new FormAttachment(0, 5);
@@ -730,10 +802,8 @@ public class FaultEditorWidget extends Composite {
 
     // Model
     private Fault fault = new Fault();
-    private List<String> logIds = Collections.emptyList();
     private List<String> logbooks = Collections.emptyList();
     private List<String> tags = Collections.emptyList();
-    private Composite composite;
 
     /**
      * 
@@ -753,8 +823,17 @@ public class FaultEditorWidget extends Composite {
         comboAssign.setText(fault.getAssigned() != null ? fault.getAssigned() : "");
         textContact.setText(fault.getContact() != null ? fault.getContact() : "");
 
-        textTimeOccoured.setText(fault.getFaultOccuredTime() != null ? fault.getFaultOccuredTime().toString() : "");
-        textTimeCleared.setText(fault.getFaultClearedTime() != null ? fault.getFaultClearedTime().toString() : "");
+        if(fault.getFaultOccuredTime() == null){
+            fault.setFaultOccuredTime(Instant.now());
+        }
+        textTimeOccoured.setText(fault.getFaultOccuredTime() != null
+                ? ZonedDateTime.ofInstant(fault.getFaultOccuredTime(), ZoneId.systemDefault())
+                        .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                : "");
+        textTimeCleared.setText(fault.getFaultClearedTime() != null
+                ? ZonedDateTime.ofInstant(fault.getFaultClearedTime(), ZoneId.systemDefault())
+                        .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                : "");
         if (fault.getBeamLossState() != null) {
             comboBeamLossStatus.setText(fault.getBeamLossState().toString());
             switch (comboBeamLossStatus.getItem(comboBeamLossStatus.getSelectionIndex())) {
@@ -773,14 +852,22 @@ public class FaultEditorWidget extends Composite {
             }
         }
 
-        textBeamLossStart.setText(fault.getBeamlostTime() != null ? fault.getBeamlostTime().toString() : "");
-        textBeamRestoredTime.setText(fault.getBeamRestoredTime() != null ? fault.getBeamRestoredTime().toString() : "");
+        textBeamLossStart.setText(fault.getBeamlostTime() != null
+                ? ZonedDateTime.ofInstant(fault.getBeamlostTime(), ZoneId.systemDefault())
+                        .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                : "");
+        textBeamRestoredTime.setText(fault.getBeamRestoredTime() != null
+                ? ZonedDateTime.ofInstant(fault.getBeamlostTime(), ZoneId.systemDefault())
+                        .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                : "");
 
         textCause.setText(fault.getRootCause() != null ? fault.getRootCause() : "");
         textRepair.setText(fault.getRepairAction() != null ? fault.getRepairAction() : "");
         textCorrectiveAction.setText(fault.getCorrectiveAction() != null ? fault.getCorrectiveAction() : "");
 
-        textLogIds.setText(String.join(";", logIds.stream().sorted().collect(Collectors.toList())));
+        textLogIds.setText(String.join(";",
+                fault.getLogIds().stream().sorted().map(String::valueOf).collect(Collectors.toList())));
+        
         multiSelectionComboLogbook.setSelection(logbooks);
         multiSelectionComboTag.setSelection(tags);
     }
@@ -792,15 +879,6 @@ public class FaultEditorWidget extends Composite {
     public void setFault(Fault fault) {
         this.fault = fault;
         updateUI();
-    }
-
-    public List<String> getLogIds() {
-        return logIds;
-    }
-
-    public void setLogIds(List<String> logIds) {
-        this.logIds = logIds;
-        textLogIds.setText(String.join(";", logIds.stream().sorted().collect(Collectors.toList())));
     }
 
     public List<String> getLogbooks() {
@@ -821,4 +899,19 @@ public class FaultEditorWidget extends Composite {
         multiSelectionComboTag.setSelection(this.tags);
     }
 
+    public void setLogIds(List<Integer> logIds) {
+        this.fault.setLogIds(logIds);
+        updateUI();
+    }
+
+    public List<String> getLogIds() {
+        return this.fault.getLogIds().stream().map(String::valueOf).collect(Collectors.toList());
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        redColor.dispose();
+        defaultColor.dispose();
+    }
 }

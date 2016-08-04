@@ -41,7 +41,7 @@ public class CreateFaultEntryWidgetDemo extends ApplicationWindow {
         Composite container = new Composite(parent, SWT.NONE);
         container.setLayout(new GridLayout(1, false));
 
-        List<String> logIds = Arrays.asList("1234", "222", "2345");
+        List<Integer> logIds = Arrays.asList(1234, 222, 2345);
         List<String> logbooks = Arrays.asList("Operations", "LOTO", "Commisioning");
         List<String> tags = Arrays.asList("Fault", "MASAR", "RF");
         

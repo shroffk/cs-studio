@@ -15,6 +15,9 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormAttachment;
 
 /**
  * Displays the fault and the associated log entries
@@ -42,7 +45,11 @@ public class FaultViewWidget extends Composite {
     private Text textContact;
     private Label lblFaultId;
     private StyledText styledFaultText;
+
+    private ScrolledComposite scrolledComposite;
     private Composite composite;
+    private Composite faultComposite;
+    private Label lblLogs;
 
     public FaultViewWidget(Composite parent, int style) {
         super(parent, SWT.NONE);
@@ -53,15 +60,32 @@ public class FaultViewWidget extends Composite {
         scrolledComposite.setExpandVertical(true);
 
         composite = new Composite(scrolledComposite, SWT.NONE);
-        composite.setLayout(new GridLayout(3, false));
+        composite.setLayout(new FormLayout());
 
-        lblFaultId = new Label(composite, SWT.NONE);
+        lblLogs = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+        FormData fd_lblLogs = new FormData();
+        fd_lblLogs.top = new FormAttachment(100);
+        fd_lblLogs.right = new FormAttachment(100);
+        fd_lblLogs.left = new FormAttachment(0);
+        lblLogs.setLayoutData(fd_lblLogs);
+        lblLogs.setText("Logs:");
+        
+        faultComposite = new Composite(composite, SWT.NONE);
+        FormData fd_faultComposite = new FormData();
+        fd_faultComposite.bottom = new FormAttachment(lblLogs);
+        fd_faultComposite.right = new FormAttachment(100);
+        fd_faultComposite.top = new FormAttachment(0);
+        fd_faultComposite.left = new FormAttachment(0);
+        faultComposite.setLayoutData(fd_faultComposite);
+        faultComposite.setLayout(new GridLayout(3, false));
+
+        lblFaultId = new Label(faultComposite, SWT.NONE);
         lblFaultId.setText("Fault Id:");
 
-        textFaultId = new Text(composite, SWT.BORDER);
+        textFaultId = new Text(faultComposite, SWT.BORDER);
         textFaultId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-        Group grpTime = new Group(composite, SWT.NONE);
+        Group grpTime = new Group(faultComposite, SWT.NONE);
         grpTime.setLayout(new GridLayout(4, false));
         grpTime.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
         grpTime.setText("Time:");
@@ -101,7 +125,7 @@ public class FaultViewWidget extends Composite {
         new Label(grpTime, SWT.NONE);
         new Label(grpTime, SWT.NONE);
 
-        Group grpOwner = new Group(composite, SWT.NONE);
+        Group grpOwner = new Group(faultComposite, SWT.NONE);
         grpOwner.setLayout(new GridLayout(4, false));
         grpOwner.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
         grpOwner.setText("Owner:");
@@ -119,37 +143,32 @@ public class FaultViewWidget extends Composite {
         textContact = new Text(grpOwner, SWT.BORDER);
         textContact.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
-        styledFaultText = new StyledText(composite, SWT.BORDER);
+        styledFaultText = new StyledText(faultComposite, SWT.BORDER);
         styledFaultText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 6));
 
-        Label lblLevel = new Label(composite, SWT.NONE);
+        Label lblLevel = new Label(faultComposite, SWT.NONE);
         lblLevel.setText("Level:");
 
-        textLevel = new Text(composite, SWT.BORDER);
+        textLevel = new Text(faultComposite, SWT.BORDER);
         textLevel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
-        Label lblLogbooks = new Label(composite, SWT.NONE);
+        Label lblLogbooks = new Label(faultComposite, SWT.NONE);
         lblLogbooks.setText("Logbooks:");
 
-        textLogbooks = new Text(composite, SWT.BORDER);
+        textLogbooks = new Text(faultComposite, SWT.BORDER);
         textLogbooks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1));
 
-        Label lblTags = new Label(composite, SWT.NONE);
+        Label lblTags = new Label(faultComposite, SWT.NONE);
         lblTags.setText("Tags:");
 
-        textTags = new Text(composite, SWT.BORDER);
+        textTags = new Text(faultComposite, SWT.BORDER);
         textTags.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1));
-
-        Label lblLogs = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
-        lblLogs.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
-        lblLogs.setText("Logs:");
-        // TODO Auto-generated method stub
 
         updateUI();
     }
 
     List<FaultLogWidget> faultWidgets = new ArrayList<FaultLogWidget>();
-    private ScrolledComposite scrolledComposite;
+    
     private void updateUI() {
         if (fault.getId() != 0) {
             textFaultId.setText(String.valueOf(fault.getId()));
@@ -176,14 +195,28 @@ public class FaultViewWidget extends Composite {
         textBeamLost.setText(fault.getBeamlostTime() != null ? fault.getBeamlostTime().toString() : "");
         textRestored.setText(fault.getBeamRestoredTime() != null ? fault.getBeamRestoredTime().toString() : "");
         
+        FormData fd = (FormData) lblLogs.getLayoutData();
+
         for (FaultLogWidget faultLogWidget : faultWidgets) {
             faultLogWidget.dispose();
+        }
+        if(logEntries.isEmpty()){
+            fd.top = new FormAttachment(100);
+            lblLogs.setLayoutData(fd);
+        }else{
+            fd.top = new FormAttachment(70);
+            lblLogs.setLayoutData(fd);
         }
         for (LogEntry logEntry : logEntries) {
             FaultLogWidget faultLogWidget = new FaultLogWidget(composite, SWT.NONE);
             faultWidgets.add(faultLogWidget);
             faultLogWidget.setLogEntry(logEntry);
-            faultLogWidget.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+            FormData fd_faultLogWidget = new FormData();
+            fd_faultLogWidget.top = new FormAttachment(lblLogs);
+            fd_faultLogWidget.bottom = new FormAttachment(100);
+            fd_faultLogWidget.right = new FormAttachment(100);
+            fd_faultLogWidget.left = new FormAttachment(0);
+            faultLogWidget.setLayoutData(fd_faultLogWidget);
         }
 
         scrolledComposite.setContent(composite);
