@@ -21,7 +21,7 @@ public class Fault {
     private Instant faultClearedTime;
 
     public enum BeamLossState {
-        True, False, Studies
+        True, False, Studies, Commissioning, Interlocks
     };
 
     private BeamLossState beamLossState;
@@ -194,4 +194,19 @@ public class Fault {
         this.logIds = Collections.unmodifiableList(logIds);
     }
 
+    public boolean validate(){
+        if(getArea() == null || getArea().isEmpty())
+            return false;
+        if(getSubsystem() == null || getSubsystem().isEmpty())
+            return false;
+        if(getDevice() == null || getDevice().isEmpty())
+            return false;
+        if(getDescription()== null || getDescription().isEmpty())
+            return false;
+        if(getFaultOccuredTime() == null)
+            return false;
+        if(getBeamLossState()== null)
+            return false;
+        return true;
+    }
 }

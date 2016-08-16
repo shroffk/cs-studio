@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import org.csstudio.logbook.LogEntry;
 import org.csstudio.logbook.Property;
@@ -21,7 +22,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.e4.compatibility.SelectionService;
+
 
 /**
  * 
@@ -143,6 +144,86 @@ public class FaultAdapter implements IAdapterFactory{
         sb.append(fault.getCorrectiveAction());
         return sb.toString();
     }
+    
+    /**
+     * A helper method to create string representation of fault for this calender view
+     * @return
+     */
+    public static String faultString(Fault fault) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(fault.getArea() != null ? fault.getArea():"None");
+        sb.append(":");
+        sb.append(fault.getSubsystem() != null ? fault.getSubsystem():"None");
+        sb.append(":");
+        sb.append(fault.getDevice() != null ? fault.getDevice():"None");
+        sb.append(System.lineSeparator());
+        
+        sb.append(fault.getAssigned() != null ? fault.getAssigned() : "no owner");
+        sb.append(System.lineSeparator());
+        
+        sb.append(fault.getDescription());
+        sb.append(System.lineSeparator());
+
+        sb.append(fault.getRootCause());
+        sb.append(System.lineSeparator());
+
+        sb.append(fault.getRepairAction());
+        sb.append(System.lineSeparator());
+        
+        sb.append(fault.getCorrectiveAction());
+        sb.append(System.lineSeparator());
+        return sb.toString();
+    }
+    
+    /**
+     * A helper method to create string representation of fault for this calender view
+     * @return
+     */
+    public static String faultSummaryString(Fault fault) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(fault.getArea() != null ? fault.getArea():"None");
+        sb.append(":");
+        sb.append(fault.getSubsystem() != null ? fault.getSubsystem():"None");
+        sb.append(":");
+        sb.append(fault.getDevice() != null ? fault.getDevice():"None");
+        sb.append(System.lineSeparator());
+        
+        sb.append(fault.getAssigned() != null ? fault.getAssigned() : "no owner");
+        sb.append(System.lineSeparator());
+
+        sb.append(fault.getDescription());
+        sb.append(System.lineSeparator());
+        return sb.toString();
+    }
+    
+    public static String createFaultExportText(Fault fault, String delimiter) {
+        StringJoiner sj = new StringJoiner(delimiter);
+        sj.add(fault.getArea());
+        sj.add(fault.getSubsystem());
+        sj.add(fault.getDevice());
+        sj.add(fault.getAssigned());
+        sj.add(fault.getContact());
+        
+        sj.add(fault.getFaultOccuredTime() != null ? fault.getFaultOccuredTime().toString() : null);
+        sj.add(fault.getFaultClearedTime() != null ? fault.getFaultClearedTime().toString() : null);
+        
+        sj.add(fault.getBeamLossState() != null ? fault.getBeamLossState().toString() : null);
+
+        sj.add(fault.getBeamlostTime() != null ? fault.getBeamlostTime().toString() : null);
+        sj.add(fault.getBeamRestoredTime() != null ? fault.getBeamRestoredTime().toString() : null);
+        
+        sj.add(fault.getDescription());
+        sj.add(fault.getRootCause());
+        sj.add(fault.getRepairAction());
+        sj.add(fault.getCorrectiveAction());
+        
+        sj.add(!fault.getLogIds().isEmpty() ? String.join(":",
+                fault.getLogIds().stream().sorted().map(String::valueOf).collect(Collectors.toList())) : null);
+
+        return sj.toString();
+    }
+   
+    
 
     /**
      * A utility method that takes a single string and using the special fault
@@ -183,6 +264,11 @@ public class FaultAdapter implements IAdapterFactory{
         return map;
     }
 
+    /**
+     * 
+     * @param logEntry
+     * @return
+     */
     public static Fault extractFaultFromLogEntry(LogEntry logEntry) {
 
         Optional<Property> property = logEntry.getProperties().stream().filter((prop) -> {

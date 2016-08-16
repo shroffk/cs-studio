@@ -143,23 +143,25 @@ public class FaultEditorWidget extends Composite {
         fd_lblContact_1.top = new FormAttachment(0, 25);
         fd_lblContact_1.left = new FormAttachment(0, 5);
         lblArea.setLayoutData(fd_lblContact_1);
-        lblArea.setText("Area:");
+        lblArea.setText("Area:*");
 
         lblSubSystem = new Label(composite, SWT.NONE);
+        lblSubSystem.setAlignment(SWT.RIGHT);
         FormData fd_lblSubSystem = new FormData();
         fd_lblSubSystem.top = new FormAttachment(0, 25);
         fd_lblSubSystem.left = new FormAttachment(33);
         fd_lblSubSystem.width = 75;
         lblSubSystem.setLayoutData(fd_lblSubSystem);
-        lblSubSystem.setText("Sub System:");
+        lblSubSystem.setText("Sub System:*");
 
         lblDevice = new Label(composite, SWT.NONE);
+        lblDevice.setAlignment(SWT.RIGHT);
         FormData fd_lblDevice = new FormData();
         fd_lblDevice.top = new FormAttachment(0, 25);
         fd_lblDevice.left = new FormAttachment(66);
         fd_lblDevice.width = 75;
         lblDevice.setLayoutData(fd_lblDevice);
-        lblDevice.setText("Device:");
+        lblDevice.setText("Device:*");
 
         comboArea = new CCombo(composite, SWT.BORDER);
         comboArea.addSelectionListener(new SelectionAdapter() {
@@ -205,7 +207,7 @@ public class FaultEditorWidget extends Composite {
         fd_lblFault.left = new FormAttachment(0, 5);
         fd_lblFault.top = new FormAttachment(comboArea, 6);
         lblFault.setLayoutData(fd_lblFault);
-        lblFault.setText("Fault:");
+        lblFault.setText("Fault:*");
 
         text = new Text(composite, SWT.BORDER | SWT.V_SCROLL);
         text.addFocusListener(new FocusAdapter() {
@@ -290,7 +292,7 @@ public class FaultEditorWidget extends Composite {
         lblNewLabel = new Label(grpTimeInfo, SWT.NONE);
         FormData fd_lblNewLabel = new FormData();
         lblNewLabel.setLayoutData(fd_lblNewLabel);
-        lblNewLabel.setText("Occurred:");
+        lblNewLabel.setText("Occurred:*");
 
         btnTimeOccoured = new Button(grpTimeInfo, SWT.NONE);
         btnTimeOccoured.addSelectionListener(new SelectionAdapter() {
@@ -430,7 +432,7 @@ public class FaultEditorWidget extends Composite {
         FormData fd_lblBeamlost = new FormData();
         fd_lblBeamlost.top = new FormAttachment(btnTimeOccoured, 5);
         lblBeamlost.setLayoutData(fd_lblBeamlost);
-        lblBeamlost.setText("Beam Lost:");
+        lblBeamlost.setText("Beam Lost:*");
 
         comboBeamLossStatus = new CCombo(grpTimeInfo, SWT.BORDER);
         comboBeamLossStatus.addSelectionListener(new SelectionAdapter() {

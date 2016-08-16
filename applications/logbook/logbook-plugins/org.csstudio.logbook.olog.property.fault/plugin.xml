@@ -76,6 +76,72 @@
                </with>
             </visibleWhen>
          </command>
+         <command
+               commandId="org.csstudio.logbook.olog.property.fault.OpenFaultDetail"
+               style="push">
+            <visibleWhen>
+               <with
+                     variable="activeMenuSelection">
+                  <and>
+                     <iterate>
+                        <adapt
+                              type="org.csstudio.logbook.olog.property.fault.Fault">
+                        </adapt>
+                     </iterate>
+                     <with
+                           variable="activeMenuSelection">
+                        <count
+                              value="1">
+                        </count>
+                     </with>
+                  </and>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.csstudio.logbook.olog.property.fault.EmailFault"
+               style="push">
+            <visibleWhen>
+               <with
+                     variable="activeMenuSelection">
+                  <and>
+                     <iterate>
+                        <adapt
+                              type="org.csstudio.logbook.olog.property.fault.Fault">
+                        </adapt>
+                     </iterate>
+                     <with
+                           variable="activeMenuSelection">
+                        <count
+                              value="1">
+                        </count>
+                     </with>
+                  </and>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.csstudio.logbook.olog.property.fault.ExportFault"
+               style="push">
+            <visibleWhen>
+               <with
+                     variable="activeMenuSelection">
+                  <and>
+                     <iterate>
+                        <adapt
+                              type="org.csstudio.logbook.olog.property.fault.Fault">
+                        </adapt>
+                     </iterate>
+                     <with
+                           variable="activeMenuSelection">
+                        <count
+                              value="+">
+                        </count>
+                     </with>
+                  </and>
+               </with>
+            </visibleWhen>
+         </command>
          <separator
                name="org.csstudio.logbook.olog.property.fault.separator">
          </separator>
@@ -98,13 +164,40 @@
             id="org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog"
             name="Update Fault Report">
       </command>
+      <command
+            defaultHandler="org.csstudio.logbook.olog.property.fault.OpenFaultDetail"
+            id="org.csstudio.logbook.olog.property.fault.OpenFaultDetail"
+            name="Fault Details">
+      </command>
+      <command
+            defaultHandler="org.csstudio.logbook.olog.property.fault.ExportFault"
+            id="org.csstudio.logbook.olog.property.fault.ExportFault"
+            name="Export Fault">
+      </command>
+      <command
+            defaultHandler="org.csstudio.logbook.olog.property.fault.EmailFault"
+            id="org.csstudio.logbook.olog.property.fault.EmailFault"
+            name="Email Fault">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="org.csstudio.logbook.olog.property.fault.FaultViewer"
-            id="org.csstudio.logbook.olog.property.fault.viewer"
-            name="Fault View"
+            class="org.csstudio.logbook.olog.property.fault.FaultCalendar"
+            id="org.csstudio.logbook.olog.property.fault.calendar"
+            name="Fault Calendar"
+            restorable="true">
+      </view>
+      <view
+            class="org.csstudio.logbook.olog.property.fault.DetailsView"
+            id="org.csstudio.logbook.olog.property.fault.detailsView"
+            name="Fault Details"
+            restorable="true">
+      </view>
+      <view
+            class="org.csstudio.logbook.olog.property.fault.TableView"
+            id="org.csstudio.logbook.olog.property.fault.table"
+            name="Fault Table"
             restorable="true">
       </view>
    </extension>

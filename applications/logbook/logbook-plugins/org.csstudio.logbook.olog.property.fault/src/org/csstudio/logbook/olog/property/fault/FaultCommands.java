@@ -33,22 +33,24 @@ public class FaultCommands extends ExtensionContributionFactory {
     public void createContributionItems(IServiceLocator serviceLocator, IContributionRoot additions) {
         ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection();
         if (selection instanceof IStructuredSelection) {
+            if (!selection.isEmpty()) {
+                List<LogEntry> selectedLogs = Arrays.asList(AdapterUtil.convert(selection, LogEntry.class));
+                List<LogEntry> faultEntries = new ArrayList<LogEntry>();
+                if (selectedLogs != null) {
+                    faultEntries.addAll(selectedLogs.stream().filter((logEntry) -> {
+                        return LogEntryUtil.getProperty(logEntry, FaultAdapter.FAULT_PROPERTY_NAME) != null;
+                    }).collect(Collectors.toList()));
+                }
+                if (faultEntries.size() == 1 && selectedLogs != null && selectedLogs.size() > 1) {
+                    CommandContributionItemParameter p = new CommandContributionItemParameter(serviceLocator, "",
+                            "org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog", SWT.PUSH);
+                    p.label = "Add Logs to fault";
+                    CommandContributionItem item = new CommandContributionItem(p);
+                    item.setVisible(true);
+                    additions.addContributionItem(item, null);
+                }
+            }
 
-            List<LogEntry> selectedLogs = Arrays.asList(AdapterUtil.convert(selection, LogEntry.class));
-            List<LogEntry> faultEntries = new ArrayList<LogEntry>();
-            if(selectedLogs != null){
-                faultEntries.addAll(selectedLogs.stream().filter((logEntry)->{
-                    return LogEntryUtil.getProperty(logEntry, FaultAdapter.FAULT_PROPERTY_NAME) != null;
-                }).collect(Collectors.toList()));
-            }
-            if (faultEntries.size() == 1 && selectedLogs != null && selectedLogs.size() > 1) {
-                CommandContributionItemParameter p = new CommandContributionItemParameter(serviceLocator, "",
-                        "org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog", SWT.PUSH);
-                p.label = "Add Logs to fault";
-                CommandContributionItem item = new CommandContributionItem(p);
-                item.setVisible(true);
-                additions.addContributionItem(item, null);
-            }
         }
     }
 

@@ -31,10 +31,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -132,6 +134,12 @@ public class FaultEditorDialog extends Dialog {
             if(fault != null) {
                 faultEditorWidget.setFault(fault);
             }
+            
+            if(logEntries != null && !logEntries.isEmpty()) {
+                // combine all logIds
+                logEntries.addAll(fault.getLogIds());
+                faultEditorWidget.setLogIds(logEntries);
+            }
 
             if (faultLogbook != null) {
                 faultEditorWidget.setLogbooks(LogEntryUtil.getLogbookNames(faultLog));
@@ -152,66 +160,66 @@ public class FaultEditorDialog extends Dialog {
     protected void okPressed() {
         // Create the fault report
         Fault fault = faultEditorWidget.getFault();
-        String faultText = FaultAdapter.createFaultText(fault);
+        // Validate the Fault
+        // Required fields are area, sub system, device, description, occur
+        // time, beam loss state
+        if (!fault.validate()) {
+            MessageDialog.openError(getShell(),
+                    "Invalid Fault Report",
+                    "All the required fields have not been correctly filled.");
+        } else {
 
-        Collection<LogbookBuilder> newLogbooks = faultEditorWidget.getLogbooks().stream().map((logbookName) -> {
-            return LogbookBuilder.logbook(logbookName);
-        }).collect(Collectors.toList());
-        if (!faultEditorWidget.getLogbooks().contains(faultLogbook)) {
-            newLogbooks.add(faultLogbook);
-        }
+            String faultText = FaultAdapter.createFaultText(fault);
 
-        Collection<TagBuilder> newTags = faultEditorWidget.getTags().stream().map((tagName) -> {
-            return TagBuilder.tag(tagName);
-        }).collect(Collectors.toList());
-        if (!faultEditorWidget.getTags().contains(faultTag)) {
-            newTags.add(faultTag);
-        }
+            Collection<LogbookBuilder> newLogbooks = faultEditorWidget.getLogbooks().stream().map((logbookName) -> {
+                return LogbookBuilder.logbook(logbookName);
+            }).collect(Collectors.toList());
+            if (!faultEditorWidget.getLogbooks().contains(faultLogbook)) {
+                newLogbooks.add(faultLogbook);
+            }
 
-        PropertyBuilder prop = FaultAdapter.createFaultProperty(fault, faultEditorWidget.getLogIds());
+            Collection<TagBuilder> newTags = faultEditorWidget.getTags().stream().map((tagName) -> {
+                return TagBuilder.tag(tagName);
+            }).collect(Collectors.toList());
+            if (!faultEditorWidget.getTags().contains(faultTag)) {
+                newTags.add(faultTag);
+            }
 
-        try {
-            
-            if (create) {
-                client.createLogEntry(LogEntryBuilder
-                        .withText(faultText)
-                        .setLevel(faultLevel)
-                        .setLogbooks(newLogbooks)
-                        .addProperty(prop)
-                        .build());
-                // Since this is a new Fault inform the contactee
-                Executors.newSingleThreadExecutor().execute(() -> {
-                    if (Platform.getPreferencesService().getBoolean("org.csstudio.logbook.olog.property.fault",
-                            "notify", true, null)) {
-                        if (fault.getContact() != null && !fault.getContact().isEmpty()) {
-                            EMailSender mailer;
-                            try {
-                                mailer = new EMailSender(Preferences.getSMTP_Host(), "cs-studio@bnl.gov",
-                                        fault.getContact(), "Fault Report");
-                                mailer.addText(faultText);
-                                mailer.close();
-                            } catch (Exception e) {
-                                log.log(Level.WARNING, "Failed to send fault message", e);
+            PropertyBuilder prop = FaultAdapter.createFaultProperty(fault, faultEditorWidget.getLogIds());
+
+            try {
+
+                if (create) {
+                    client.createLogEntry(LogEntryBuilder.withText(faultText).setLevel(faultLevel)
+                            .setLogbooks(newLogbooks).addProperty(prop).build());
+                    // Since this is a new Fault inform the contactee
+                    Executors.newSingleThreadExecutor().execute(() -> {
+                        if (Platform.getPreferencesService().getBoolean("org.csstudio.logbook.olog.property.fault",
+                                "notify", true, null)) {
+                            if (fault.getContact() != null && !fault.getContact().isEmpty()) {
+                                EMailSender mailer;
+                                try {
+                                    mailer = new EMailSender(Preferences.getSMTP_Host(), "cs-studio@bnl.gov",
+                                            fault.getContact(), "Fault Report");
+                                    mailer.addText(faultText);
+                                    mailer.close();
+                                } catch (Exception e) {
+                                    log.log(Level.WARNING, "Failed to send fault message", e);
+                                }
                             }
                         }
-                    }
-                });
-            } else {
-                client.updateLogEntry(LogEntryBuilder
-                        .logEntry(faultLog)
-                        .setText(faultText)
-                        .setLevel(faultLevel)
-                        .setLogbooks(newLogbooks)
-                        .setTags(newTags)
-                        .addProperty(prop)
-                        .build());
+                    });
+                } else {
+                    client.updateLogEntry(LogEntryBuilder.logEntry(faultLog).setText(faultText).setLevel(faultLevel)
+                            .setLogbooks(newLogbooks).setTags(newTags).addProperty(prop).build());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            super.okPressed();
         }
-        super.okPressed();
     }
-    
+
     @Override
     protected boolean isResizable() {
         return true;

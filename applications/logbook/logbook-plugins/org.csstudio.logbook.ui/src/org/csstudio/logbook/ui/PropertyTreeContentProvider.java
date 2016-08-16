@@ -4,6 +4,7 @@
 package org.csstudio.logbook.ui;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.csstudio.logbook.Property;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -26,7 +27,15 @@ public class PropertyTreeContentProvider implements ITreeContentProvider {
     @SuppressWarnings("unchecked")
     @Override
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    this.properties = (List<Property>) newInput;
+        if(newInput != null){
+            this.properties = ((List<Property>) newInput)
+                                        .stream()
+                                        .sorted((o1, o2) -> {return o1.getName().compareTo(o2.getName());})
+                                        .collect(Collectors.toList());
+        } else{
+            this.properties = (List<Property>) newInput;
+        }
+    
     }
 
     @Override
@@ -37,7 +46,9 @@ public class PropertyTreeContentProvider implements ITreeContentProvider {
     @Override
     public Object[] getChildren(Object parentElement) {
     if (parentElement instanceof Property) {
-        return ((Property) parentElement).getAttributes().toArray();
+        return ((Property) parentElement).getAttributes().stream().sorted((o1, o2) -> {
+            return o1.getKey().compareTo(o2.getKey());
+        }).toArray();
     }
     return null;
     }

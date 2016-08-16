@@ -2,6 +2,7 @@ package org.csstudio.logbook.olog.property.fault;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.csstudio.logbook.LogEntry;
@@ -49,7 +50,6 @@ public class FaultViewWidget extends Composite {
     private ScrolledComposite scrolledComposite;
     private Composite composite;
     private Composite faultComposite;
-    private Label lblLogs;
 
     public FaultViewWidget(Composite parent, int style) {
         super(parent, SWT.NONE);
@@ -60,29 +60,17 @@ public class FaultViewWidget extends Composite {
         scrolledComposite.setExpandVertical(true);
 
         composite = new Composite(scrolledComposite, SWT.NONE);
-        composite.setLayout(new FormLayout());
-
-        lblLogs = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
-        FormData fd_lblLogs = new FormData();
-        fd_lblLogs.top = new FormAttachment(100);
-        fd_lblLogs.right = new FormAttachment(100);
-        fd_lblLogs.left = new FormAttachment(0);
-        lblLogs.setLayoutData(fd_lblLogs);
-        lblLogs.setText("Logs:");
+        composite.setLayout(new GridLayout(1, false));
         
         faultComposite = new Composite(composite, SWT.NONE);
-        FormData fd_faultComposite = new FormData();
-        fd_faultComposite.bottom = new FormAttachment(lblLogs);
-        fd_faultComposite.right = new FormAttachment(100);
-        fd_faultComposite.top = new FormAttachment(0);
-        fd_faultComposite.left = new FormAttachment(0);
-        faultComposite.setLayoutData(fd_faultComposite);
+        faultComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
         faultComposite.setLayout(new GridLayout(3, false));
 
         lblFaultId = new Label(faultComposite, SWT.NONE);
         lblFaultId.setText("Fault Id:");
 
         textFaultId = new Text(faultComposite, SWT.BORDER);
+        textFaultId.setEditable(false);
         textFaultId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
         Group grpTime = new Group(faultComposite, SWT.NONE);
@@ -95,12 +83,14 @@ public class FaultViewWidget extends Composite {
         lblOccurred.setText("Occurred:");
 
         textOccurred = new Text(grpTime, SWT.BORDER);
+        textOccurred.setEditable(false);
         textOccurred.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
         Label lblCleared = new Label(grpTime, SWT.NONE);
         lblCleared.setText("Cleared");
 
         textCleared = new Text(grpTime, SWT.BORDER);
+        textCleared.setEditable(false);
         textCleared.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
         Label lblBeamLossState = new Label(grpTime, SWT.NONE);
@@ -108,12 +98,16 @@ public class FaultViewWidget extends Composite {
         lblBeamLossState.setText("Beam Loss State:");
 
         textBeamLossState = new Text(grpTime, SWT.BORDER);
+        textBeamLossState.setEditable(false);
         textBeamLossState.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        new Label(grpTime, SWT.NONE);
+        new Label(grpTime, SWT.NONE);
 
         Label lblLossStart = new Label(grpTime, SWT.NONE);
         lblLossStart.setText("Lost:");
 
         textBeamLost = new Text(grpTime, SWT.BORDER);
+        textBeamLost.setEditable(false);
         textBeamLost.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
         Label lblRestored = new Label(grpTime, SWT.NONE);
@@ -121,9 +115,8 @@ public class FaultViewWidget extends Composite {
         lblRestored.setText("Restored:");
 
         textRestored = new Text(grpTime, SWT.BORDER);
+        textRestored.setEditable(false);
         textRestored.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-        new Label(grpTime, SWT.NONE);
-        new Label(grpTime, SWT.NONE);
 
         Group grpOwner = new Group(faultComposite, SWT.NONE);
         grpOwner.setLayout(new GridLayout(4, false));
@@ -135,33 +128,39 @@ public class FaultViewWidget extends Composite {
         lblAssign.setText("Assigned Group:");
 
         textAssinedGroup = new Text(grpOwner, SWT.BORDER);
+        textAssinedGroup.setEditable(false);
         textAssinedGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
         Label lblNewLabel_9 = new Label(grpOwner, SWT.NONE);
         lblNewLabel_9.setText("Contact:");
 
         textContact = new Text(grpOwner, SWT.BORDER);
+        textContact.setEditable(false);
         textContact.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
         styledFaultText = new StyledText(faultComposite, SWT.BORDER);
+        styledFaultText.setEditable(false);
         styledFaultText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 6));
 
         Label lblLevel = new Label(faultComposite, SWT.NONE);
         lblLevel.setText("Level:");
 
         textLevel = new Text(faultComposite, SWT.BORDER);
+        textLevel.setEditable(false);
         textLevel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
         Label lblLogbooks = new Label(faultComposite, SWT.NONE);
         lblLogbooks.setText("Logbooks:");
 
         textLogbooks = new Text(faultComposite, SWT.BORDER);
+        textLogbooks.setEditable(false);
         textLogbooks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1));
 
         Label lblTags = new Label(faultComposite, SWT.NONE);
         lblTags.setText("Tags:");
 
         textTags = new Text(faultComposite, SWT.BORDER);
+        textTags.setEditable(false);
         textTags.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1));
 
         updateUI();
@@ -175,11 +174,6 @@ public class FaultViewWidget extends Composite {
         } else {
             textFaultId.setText("New Fault Report");
         }
-        // comboArea.setText(fault.getArea() != null ? fault.getArea() : "");
-        // comboSubSystem.setText(fault.getSubsystem() != null ?
-        // fault.getSubsystem() : "");
-        // comboDevice.setText(fault.getDevice() != null ? fault.getDevice() :
-        // "");
 
         styledFaultText.setText(FaultAdapter.createFaultText(fault));
 
@@ -194,31 +188,23 @@ public class FaultViewWidget extends Composite {
 
         textBeamLost.setText(fault.getBeamlostTime() != null ? fault.getBeamlostTime().toString() : "");
         textRestored.setText(fault.getBeamRestoredTime() != null ? fault.getBeamRestoredTime().toString() : "");
-        
-        FormData fd = (FormData) lblLogs.getLayoutData();
 
         for (FaultLogWidget faultLogWidget : faultWidgets) {
             faultLogWidget.dispose();
         }
-        if(logEntries.isEmpty()){
-            fd.top = new FormAttachment(100);
-            lblLogs.setLayoutData(fd);
-        }else{
-            fd.top = new FormAttachment(70);
-            lblLogs.setLayoutData(fd);
-        }
+
+        logEntries.sort((LogEntry o1, LogEntry o2) -> {
+            return o1.getCreateDate().compareTo(o2.getCreateDate());
+        });
         for (LogEntry logEntry : logEntries) {
             FaultLogWidget faultLogWidget = new FaultLogWidget(composite, SWT.NONE);
             faultWidgets.add(faultLogWidget);
             faultLogWidget.setLogEntry(logEntry);
-            FormData fd_faultLogWidget = new FormData();
-            fd_faultLogWidget.top = new FormAttachment(lblLogs);
-            fd_faultLogWidget.bottom = new FormAttachment(100);
-            fd_faultLogWidget.right = new FormAttachment(100);
-            fd_faultLogWidget.left = new FormAttachment(0);
+            GridData fd_faultLogWidget = new GridData(SWT.FILL, SWT.FILL, true, true);
             faultLogWidget.setLayoutData(fd_faultLogWidget);
         }
 
+        scrolledComposite.setExpandVertical(true);
         scrolledComposite.setContent(composite);
         scrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 

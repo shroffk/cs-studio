@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.ui,
  org.jfxtras.agenda;bundle-version="8.0.0",
  org.jfxtras.common;bundle-version="8.0.0",
  org.csstudio.logbook.viewer;bundle-version="1.0.0",
- edu.msu.nscl.olog.api
+ edu.msu.nscl.olog.api,
+ org.csstudio.email.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

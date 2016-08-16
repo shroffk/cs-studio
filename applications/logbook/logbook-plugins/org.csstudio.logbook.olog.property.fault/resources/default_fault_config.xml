@@ -6,5 +6,7 @@
   <groups>
     <group name="Controls" owner="Kunal Shroff" contact="shroffk@bnl.gov" />
     <group name="Operations" owner="Reid Smith" contact="smithr@bnl.gov" />
+    <group name="xf23" owner="Kunal Shroff" contact="shroffk@bnl.gov" />
+    <group name="xf21" owner="Kunal Shroff" contact="shroffk@bnl.gov" />
   </groups>
 </faultConfiguration>
