@@ -11,15 +11,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.csstudio.vtype.pv.PV;
-import org.csstudio.vtype.pv.internal.Preferences;
+import org.csstudio.vtype.pv.jca.JCA_Preferences.MonitorMask;
 import org.diirt.vtype.VType;
 
 import gov.aps.jca.CAStatus;
 import gov.aps.jca.Channel;
 import gov.aps.jca.Monitor;
+import gov.aps.jca.dbr.DBR;
 import gov.aps.jca.dbr.DBRType;
 import gov.aps.jca.event.AccessRightsEvent;
 import gov.aps.jca.event.AccessRightsListener;
@@ -38,10 +38,18 @@ import gov.aps.jca.event.PutListener;
 @SuppressWarnings("nls")
 public class JCA_PV extends PV implements ConnectionListener, MonitorListener, AccessRightsListener
 {
-    final private static Logger logger = Logger.getLogger(JCA_PV.class.getName());
+    /** Threshold above which arrays use a lower channel priority
+     *  (idea from PVManager)
+     */
+    private static final int LARGE_ARRAY_THRESHOLD = JCA_Preferences.getInstance().largeArrayThreshold();
+
+    /** Priority to use for channel */
+    private static final short base_priority = JCA_Preferences.getInstance().getMonitorMask() == MonitorMask.VALUE
+                                             ? Channel.PRIORITY_OPI
+                                             : Channel.PRIORITY_ARCHIVE;
 
     /** Request plain DBR type or ..TIME..? */
-    final private boolean plain_dbr;
+    private final boolean plain_dbr;
 
     /** Channel Access does not really distinguish between array and scalar.
      *  An array may at times only have one value, like a scalar.
@@ -50,37 +58,57 @@ public class JCA_PV extends PV implements ConnectionListener, MonitorListener, A
      */
     private volatile boolean is_array = false;
 
+    /** Array with more than LARGE_ARRAY_THRESHOLD elements? */
+    private volatile boolean is_large_array = false;
+
     /** JCA Channel */
-    final private Channel channel;
+    private volatile Channel channel;
 
-    private volatile Object metadata = null;
+    /** Meta data.
+     *
+     *  <p>May be
+     *  <ul>
+     *  <li>null
+     *  <li>DBR_CTRL_Double, DBR_CTRL_INT, ..BYTE, which all implement CTRL and TIME
+     *  <li>DBR_CTRL_String, DBR_CTRL_Enum which are each different
+     *  </ul>
+     */
+    private volatile DBR metadata = null;
 
-    final private GetListener meta_get_listener = new GetListener()
+    /** Listener to initial get-callback for meta data */
+    final private GetListener meta_get_listener = (GetEvent ev) ->
     {
-        @Override
-        public void getCompleted(final GetEvent ev)
+        final DBR old_metadata = metadata;
+        final Class<?> old_type = old_metadata == null ? null : old_metadata.getClass();
+        // Channels from CAS, not based on records, may fail
+        // to provide meta data
+        if (ev.getStatus().isSuccessful())
         {
-            final Object old_metadata = metadata;
-            final Class<?> old_type = old_metadata == null ? Object.class : old_metadata.getClass();
-            // Channels from CAS, not based on records, may fail
-            // to provide meta data
-            if (ev.getStatus().isSuccessful())
-            {
-                metadata = ev.getDBR();
-                logger.log(Level.FINE, "{0} received meta data: {1}", new Object[] { getName(), metadata });
-            }
-            else
-            {
-                metadata = null;
-                logger.log(Level.FINE, "{0} has no meta data: {1}", new Object[] { getName(), ev.getStatus() });
-            }
-            // If channel changed its type, cancel potentially existing subscription
-            final Class<?> new_type = metadata == null ? Object.class : metadata.getClass();
-            if (old_type != new_type)
-                unsubscribe();
-            // Subscribe, either for the first time or because type changed requires new one.
-            // NOP if channel is already subscribed.
-            subscribe();
+            metadata = ev.getDBR();
+            logger.log(Level.FINE, "{0} received meta data: {1}", new Object[] { getName(), metadata });
+        }
+        else
+        {
+            metadata = null;
+            logger.log(Level.FINE, "{0} has no meta data: {1}", new Object[] { getName(), ev.getStatus() });
+        }
+        // If channel changed its type, cancel potentially existing subscription
+        final Class<?> new_type = metadata == null ? null : metadata.getClass();
+        if (old_type != new_type)
+            unsubscribe();
+        // Subscribe, either for the first time or because type changed requires new one.
+        // NOP if channel is already subscribed.
+        subscribe();
+    };
+
+    /** Listener to meta data changes */
+    final private MonitorListener meta_change_listener = (MonitorEvent ev) ->
+    {
+        if (ev.getStatus().isSuccessful())
+        {
+            metadata = ev.getDBR();
+            logger.log(Level.FINE, "{0} received new meta data: {1}", new Object[] { getName(), metadata });
+            monitorChanged(ev);
         }
     };
 
@@ -88,6 +116,10 @@ public class JCA_PV extends PV implements ConnectionListener, MonitorListener, A
      *  Non-zero value also used to indicate access right change subscription.
      */
     private AtomicReference<Monitor> value_monitor = new AtomicReference<Monitor>();
+
+    /** Metadata update subscription */
+    private AtomicReference<Monitor> metadata_monitor = new AtomicReference<Monitor>();
+
 
     /** Initialize
      *  @param name Full name, may include "ca://"
@@ -102,7 +134,15 @@ public class JCA_PV extends PV implements ConnectionListener, MonitorListener, A
         notifyListenersOfPermissions(true);
         // .RTYP does not provide meta data
         plain_dbr = base_name.endsWith(".RTYP");
-        channel = JCAContext.getInstance().getContext().createChannel(base_name, this);
+        createChannel(base_name);
+    }
+
+    private void createChannel(final String base_name) throws Exception
+    {
+        final short priority = is_large_array
+                             ? base_priority
+                             : (short) (base_priority + 1);
+        channel = JCAContext.getInstance().getContext().createChannel(base_name, this, priority);
         channel.getContext().flushIO();
     }
 
@@ -112,10 +152,30 @@ public class JCA_PV extends PV implements ConnectionListener, MonitorListener, A
     {
         if (ev.isConnected())
         {
-            logger.fine(getName() + " connected");
+            logger.log(Level.FINE, "{0} connected", getName());
+
+            final int elements = channel.getElementCount();
+            is_array = elements != 1;
+            if (elements > LARGE_ARRAY_THRESHOLD  &&  ! is_large_array)
+            {
+                is_large_array = true;
+                final String name = channel.getName();
+                channel.dispose();
+                logger.log(Level.FINE, "Reconnecting large array {0} at lower priority", name);
+                channel = null;
+                try
+                {
+                    createChannel(name);
+                }
+                catch (Exception ex)
+                {
+                    logger.log(Level.SEVERE, "Cannot re-create channel for large array", ex);
+                }
+                return;
+            }
+
             final boolean is_readonly = ! channel.getWriteAccess();
             notifyListenersOfPermissions(is_readonly);
-            is_array = channel.getElementCount() != 1;
             getMetaData(); // .. and start subscription
         }
         else
@@ -152,9 +212,9 @@ public class JCA_PV extends PV implements ConnectionListener, MonitorListener, A
         try
         {
             logger.log(Level.FINE, getName() + " subscribes");
-            final int mask = Preferences.monitorMask().getMask();
-            // Since EPICS 3.14.12, subscribing to zero elements requests update with current array size
-            final Monitor new_monitor = channel.addMonitor(DBRHelper.getTimeType(plain_dbr, channel.getFieldType()), 0, mask, this);
+            final int mask = JCA_Preferences.getInstance().getMonitorMask().getMask();
+            final int request_count = JCAContext.getInstance().getRequestCount(channel);
+            final Monitor new_monitor = channel.addMonitor(DBRHelper.getTimeType(plain_dbr, channel.getFieldType()), request_count, mask, this);
 
             final Monitor old_monitor = value_monitor.getAndSet(new_monitor);
             // Could there have been another subscription while we established this one?
@@ -172,8 +232,34 @@ public class JCA_PV extends PV implements ConnectionListener, MonitorListener, A
                     logger.log(Level.WARNING, getName() + " cannot clear old monitor", ex);
                 }
             }
-            // TODO Monitor.PROPERTY subscription
 
+            // Subscribe to metadata changes (DBE_PROPERTY)
+            final DBRType meta_request = getRequestForMetadata((DBR)metadata);
+            if (JCA_Preferences.getInstance().isDbePropertySupported()  &&  meta_request != null)
+            {
+                Monitor old_metadata_monitor = null;
+                try
+                {
+                    old_metadata_monitor = metadata_monitor.getAndSet(
+                        channel.addMonitor(meta_request, request_count, Monitor.PROPERTY, meta_change_listener));
+
+                }
+                catch (Throwable ex)
+                {
+                    logger.log(Level.WARNING, getName() + " cannot create metadata monitor", ex);
+                }
+                if (old_metadata_monitor != null)
+                {
+                    try
+                    {
+                        old_metadata_monitor.clear();
+                    }
+                    catch (Throwable ex)
+                    {
+                        logger.log(Level.WARNING, getName() + " cannot clear old metadata monitor", ex);
+                    }
+                }
+            }
             channel.addAccessRightsListener(this);
             channel.getContext().flushIO();
         }
@@ -183,25 +269,48 @@ public class JCA_PV extends PV implements ConnectionListener, MonitorListener, A
         }
     }
 
+    private DBRType getRequestForMetadata(final DBR metadata)
+    {
+        if (metadata.isCTRL())
+            return metadata.getType();
+        if (metadata.isENUM())
+            return DBRType.CTRL_ENUM;
+        return null;
+    }
+
     /** Cancel subscriptions.
      *  NOP if not subscribed.
      */
     private void unsubscribe()
     {
-        final Monitor old_monitor = value_monitor.getAndSet(null);
-        if (old_monitor == null)
-            return;
-        logger.log(Level.FINE, getName() + " unsubscribes");
-        try
+        Monitor old_monitor = value_monitor.getAndSet(null);
+        if (old_monitor != null)
         {
-            channel.removeAccessRightsListener(this);
-            old_monitor.clear();
+            logger.log(Level.FINE, getName() + " unsubscribes");
+            try
+            {
+                channel.removeAccessRightsListener(this);
+                old_monitor.clear();
+            }
+            catch (Exception ex)
+            {    // This is 'normal', log only on FINE:
+                // When the channel is disconnected, CAJ cannot send
+                // an un-subscribe request to the client
+                logger.log(Level.FINE, getName() + " cannot unsubscribe", ex);
+            }
         }
-        catch (Exception ex)
-        {    // This is 'normal', log only on FINE:
-            // When the channel is disconnected, CAJ cannot send
-            // an un-subscribe request to the client
-            logger.log(Level.FINE, getName() + " cannot unsubscribe", ex);
+
+        old_monitor = metadata_monitor.getAndSet(null);
+        if (old_monitor != null)
+        {
+            try
+            {
+                old_monitor.clear();
+            }
+            catch (Throwable ex)
+            {
+                logger.log(Level.FINE, getName() + " cannot unsubscribe metadata", ex);
+            }
         }
     }
 
@@ -431,7 +540,7 @@ public class JCA_PV extends PV implements ConnectionListener, MonitorListener, A
                                     + new_value.getClass().getName());
         // When performing many consecutive writes,
         // sending them in 'bulk' would be more efficient,
-        // but in most case it's probably better to perform each write ASAP
+        // but in most cases it's probably better to perform each write ASAP
         channel.getContext().flushIO();
     }
 

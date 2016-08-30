@@ -7,9 +7,7 @@
  ******************************************************************************/
 package org.csstudio.vtype.pv.internal;
 
-import org.csstudio.platform.libs.epics.EpicsPlugin;
-import org.csstudio.platform.libs.epics.EpicsPlugin.MonitorMask;
-import org.csstudio.platform.libs.epics.PreferenceConstants;
+import org.csstudio.vtype.pv.PVPlugin;
 import org.csstudio.vtype.pv.jca.JCA_PVFactory;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
@@ -20,26 +18,12 @@ import org.eclipse.core.runtime.preferences.IPreferencesService;
 @SuppressWarnings("nls")
 public class Preferences
 {
-    private static String getString(final String plugin, final String setting, final String default_value)
+    public static String defaultType()
     {
         final IPreferencesService service = Platform.getPreferencesService();
         if (service == null)
-            return default_value;
-        return service.getString(plugin, setting, default_value, null);
-    }
+            return JCA_PVFactory.TYPE;
+        return service.getString(PVPlugin.ID, "default_type", JCA_PVFactory.TYPE, null);
 
-    public static String defaultType()
-    {
-        return getString(Activator.ID, "default_type", JCA_PVFactory.TYPE);
-    }
-
-    public static boolean usePureJava()
-    {
-        return Boolean.parseBoolean(getString(EpicsPlugin.ID, PreferenceConstants.PURE_JAVA, Boolean.TRUE.toString()));
-    }
-
-    public static MonitorMask monitorMask()
-    {
-        return MonitorMask.valueOf(getString(EpicsPlugin.ID, PreferenceConstants.MONITOR, "VALUE"));
     }
 }
