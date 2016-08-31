@@ -43,11 +43,10 @@ import org.eclipse.swt.widgets.Text;
 
 public class FaultEditorWidget extends Composite {
 
-
     private Composite composite;
-    
+
     // general information
-    
+
     private Label lblFaultId;
     private Label lblFaultID;
     private Text text;
@@ -84,9 +83,6 @@ public class FaultEditorWidget extends Composite {
     private Text textCause;
     private Text textRepair;
     private Text textCorrectiveAction;
-
-    // OLog
-    private Group grpLogs;
     private Text textLogIds;
     private Label lblLogIds;
     private Button btnTags;
@@ -109,192 +105,137 @@ public class FaultEditorWidget extends Composite {
         super(parent, style);
         redColor = Display.getCurrent().getSystemColor(SWT.COLOR_RED);
         defaultColor = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
-        
+
         this.fc = fc;
         this.availableLogbooks = availableLogbooks;
         this.availableTags = availableTags;
         setLayout(new GridLayout(1, false));
-        
+
         composite = new Composite(this, SWT.NONE);
+        composite.setLayout(new GridLayout(6, false));
+
         GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
         gridData.minimumHeight = 600;
-        gridData.minimumWidth= 400;
+        gridData.minimumWidth = 400;
         composite.setLayoutData(gridData);
-        
-        composite.setLayout(new FormLayout());
 
         lblFaultId = new Label(composite, SWT.NONE);
-        FormData fd_lblFaultId = new FormData();
-        fd_lblFaultId.left = new FormAttachment(0, 5);
-        fd_lblFaultId.top = new FormAttachment(0, 5);
-        lblFaultId.setLayoutData(fd_lblFaultId);
         lblFaultId.setText("Fault Id:");
 
         lblFaultID = new Label(composite, SWT.NONE);
-        FormData fd_lblFaultID = new FormData();
-        fd_lblFaultID.top = new FormAttachment(0, 5);
-        fd_lblFaultID.left = new FormAttachment(0, 75);
-        fd_lblFaultID.right = new FormAttachment(100, -5);
-        lblFaultID.setLayoutData(fd_lblFaultID);
+        lblFaultID.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 5, 1));
         lblFaultID.setText("New Fault Report");
 
         lblArea = new Label(composite, SWT.NONE);
-        FormData fd_lblContact_1 = new FormData();
-        fd_lblContact_1.top = new FormAttachment(0, 25);
-        fd_lblContact_1.left = new FormAttachment(0, 5);
-        lblArea.setLayoutData(fd_lblContact_1);
         lblArea.setText("Area:*");
 
-        lblSubSystem = new Label(composite, SWT.NONE);
-        lblSubSystem.setAlignment(SWT.RIGHT);
-        FormData fd_lblSubSystem = new FormData();
-        fd_lblSubSystem.top = new FormAttachment(0, 25);
-        fd_lblSubSystem.left = new FormAttachment(33);
-        fd_lblSubSystem.width = 75;
-        lblSubSystem.setLayoutData(fd_lblSubSystem);
-        lblSubSystem.setText("Sub System:*");
-
-        lblDevice = new Label(composite, SWT.NONE);
-        lblDevice.setAlignment(SWT.RIGHT);
-        FormData fd_lblDevice = new FormData();
-        fd_lblDevice.top = new FormAttachment(0, 25);
-        fd_lblDevice.left = new FormAttachment(66);
-        fd_lblDevice.width = 75;
-        lblDevice.setLayoutData(fd_lblDevice);
-        lblDevice.setText("Device:*");
-
         comboArea = new CCombo(composite, SWT.BORDER);
+        comboArea.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1));
         comboArea.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 fault.setArea(comboArea.getItem(comboArea.getSelectionIndex()));
             }
         });
-        FormData fd_comboArea = new FormData();
-        fd_comboArea.right = new FormAttachment(lblSubSystem, -3);
-        fd_comboArea.top = new FormAttachment(0, 25);
-        fd_comboArea.left = new FormAttachment(0, 75);
-        comboArea.setLayoutData(fd_comboArea);
+
+        lblSubSystem = new Label(composite, SWT.NONE);
+        lblSubSystem.setAlignment(SWT.RIGHT);
+        lblSubSystem.setText("Sub System:*");
 
         comboSubSystem = new CCombo(composite, SWT.BORDER);
+        comboSubSystem.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1));
         comboSubSystem.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 fault.setSubsystem(comboSubSystem.getItem(comboSubSystem.getSelectionIndex()));
             }
         });
-        FormData fd_comboSubSystem = new FormData();
-        fd_comboSubSystem.left = new FormAttachment(lblSubSystem, 3);
-        fd_comboSubSystem.right = new FormAttachment(lblDevice, -3);
-        fd_comboSubSystem.top = new FormAttachment(0, 25);
-        comboSubSystem.setLayoutData(fd_comboSubSystem);
+
+        lblDevice = new Label(composite, SWT.NONE);
+        lblDevice.setAlignment(SWT.RIGHT);
+        lblDevice.setText("Device:*");
 
         comboDevice = new CCombo(composite, SWT.BORDER);
+        comboDevice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1));
         comboDevice.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 fault.setDevice(comboDevice.getItem(comboDevice.getSelectionIndex()));
             }
         });
-        FormData fd_comboDevice = new FormData();
-        fd_comboDevice.left = new FormAttachment(lblDevice, 3);
-        fd_comboDevice.right = new FormAttachment(100, -5);
-        fd_comboDevice.top = new FormAttachment(0, 25);
-        comboDevice.setLayoutData(fd_comboDevice);
 
         lblFault = new Label(composite, SWT.NONE);
-        FormData fd_lblFault = new FormData();
-        fd_lblFault.left = new FormAttachment(0, 5);
-        fd_lblFault.top = new FormAttachment(comboArea, 6);
-        lblFault.setLayoutData(fd_lblFault);
         lblFault.setText("Fault:*");
 
         text = new Text(composite, SWT.BORDER | SWT.V_SCROLL);
+        GridData gd_text = new GridData(SWT.FILL, SWT.FILL, true, true, 5, 3);
+        gd_text.widthHint = 312;
+        text.setLayoutData(gd_text);
         text.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
                 fault.setDescription(text.getText());
             }
         });
-        FormData fd_text = new FormData();
-        fd_text.left = new FormAttachment(0, 75);
-        fd_text.right = new FormAttachment(100, -5);
-        fd_text.bottom = new FormAttachment(25);
-        fd_text.top = new FormAttachment(comboArea, 6);
-        text.setLayoutData(fd_text);
-
-        lblAssign = new Label(composite, SWT.NONE);
-        FormData fd_lblAssign = new FormData();
-        fd_lblAssign.top = new FormAttachment(text, 6);
-        fd_lblAssign.left = new FormAttachment(0, 5);
-        lblAssign.setLayoutData(fd_lblAssign);
-        lblAssign.setText("Assign:");
-
-        lblContact = new Label(composite, SWT.NONE);
-        FormData fd_lblContact = new FormData();
-        fd_lblContact.bottom = new FormAttachment(0);
-        fd_lblContact.right = new FormAttachment(0);
-        fd_lblContact.top = new FormAttachment(0);
-        fd_lblContact.left = new FormAttachment(0);
-        lblContact.setLayoutData(fd_lblContact);
-        FormData fd_lblContact_11 = new FormData();
-        fd_lblContact_11.top = new FormAttachment(text, 6);
-        fd_lblContact_11.left = new FormAttachment(50);
-        lblContact.setLayoutData(fd_lblContact_11);
-        lblContact.setText("Contact:");
-
-        comboAssign = new CCombo(composite, SWT.BORDER);
-        comboAssign.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                String assigned = comboAssign.getItem(comboAssign.getSelectionIndex());
-                fault.setAssigned(assigned);
-                Optional<FaultConfiguration.Group> assignedGroup = fc.getGroups().stream()
-                        .filter(new Predicate<FaultConfiguration.Group>() {
+        new Label(composite, SWT.NONE);
+        new Label(composite, SWT.NONE);
+        
+                lblAssign = new Label(composite, SWT.NONE);
+                lblAssign.setText("Assign:");
+        
+                comboAssign = new CCombo(composite, SWT.BORDER);
+                comboAssign.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+                comboAssign.addSelectionListener(new SelectionAdapter() {
                     @Override
-                    public boolean test(FaultConfiguration.Group t) {
-                        return t.getName().equals(assigned);
+                    public void widgetSelected(SelectionEvent e) {
+                        String assigned = comboAssign.getItem(comboAssign.getSelectionIndex());
+                        fault.setAssigned(assigned);
+                        Optional<FaultConfiguration.Group> assignedGroup = fc.getGroups().stream()
+                                .filter(new Predicate<FaultConfiguration.Group>() {
+                                    @Override
+                                    public boolean test(FaultConfiguration.Group t) {
+                                        return t.getName().equals(assigned);
+                                    }
+                                }).findFirst();
+                        assignedGroup.ifPresent(group -> {
+                            fault.setContact(group.getOwner() + "<" + group.getContact() + ">");
+                            textContact.setText(group.getOwner() + "<" + group.getContact() + ">");
+                        });
+
                     }
-                }).findFirst();
-                assignedGroup.ifPresent(group -> {
-                    fault.setContact(group.getOwner() + "<" + group.getContact() + ">");
-                    textContact.setText(group.getOwner() + "<" + group.getContact() + ">");
                 });
+        
+                lblContact = new Label(composite, SWT.NONE);
+                lblContact.setText("Contact:");
+        
+                textContact = new Text(composite, SWT.BORDER);
+                textContact.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-            }
-        });
-        FormData fd_comboAssign = new FormData();
-        fd_comboAssign.right = new FormAttachment(lblContact, -5);
-        fd_comboAssign.top = new FormAttachment(text, 6);
-        fd_comboAssign.left = new FormAttachment(comboArea, 0, SWT.LEFT);
-        comboAssign.setLayoutData(fd_comboAssign);
+        labelTime = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+        labelTime.setText("Time:");
+        labelTime.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 6, 1));
 
-        textContact = new Text(composite, SWT.BORDER);
-        FormData fd_textContact = new FormData();
-        fd_textContact.right = new FormAttachment(100, -5);
-        fd_textContact.left = new FormAttachment(lblContact, 5);
-        fd_textContact.top = new FormAttachment(text, 6);
-        textContact.setLayoutData(fd_textContact);
-        // TODO Auto-generated constructor stub
-
-        Group grpTimeInfo = new Group(composite, SWT.NONE);
-        FormData fd_grpTimeInfo = new FormData();
-        fd_grpTimeInfo.top = new FormAttachment(comboAssign);
-        fd_grpTimeInfo.left = new FormAttachment(0, 1);
-        fd_grpTimeInfo.right = new FormAttachment(100, -1);
-        grpTimeInfo.setLayoutData(fd_grpTimeInfo);
-        grpTimeInfo.setText("Time:");
-        FormLayout fl_grpTimeInfo = new FormLayout();
-        fl_grpTimeInfo.marginWidth = 5;
-        fl_grpTimeInfo.marginHeight = 5;
-        grpTimeInfo.setLayout(fl_grpTimeInfo);
-
-        lblNewLabel = new Label(grpTimeInfo, SWT.NONE);
-        FormData fd_lblNewLabel = new FormData();
-        lblNewLabel.setLayoutData(fd_lblNewLabel);
+        lblNewLabel = new Label(composite, SWT.NONE);
         lblNewLabel.setText("Occurred:*");
 
-        btnTimeOccoured = new Button(grpTimeInfo, SWT.NONE);
+        textTimeOccoured = new Text(composite, SWT.BORDER);
+        textTimeOccoured.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        textTimeOccoured.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                try {
+                    Instant i = LocalDateTime.parse(textTimeOccoured.getText()).atZone(ZoneId.systemDefault())
+                            .toInstant();
+                    textTimeOccoured.setForeground(defaultColor);
+                    fault.setFaultOccuredTime(i);
+                } catch (Exception e1) {
+                    textTimeOccoured.setForeground(redColor);
+                }
+            }
+        });
+        textTimeOccoured.setToolTipText("example: 2014-11-01T22:07:24");
+
+        btnTimeOccoured = new Button(composite, SWT.NONE);
         btnTimeOccoured.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -330,41 +271,29 @@ public class FaultEditorWidget extends Composite {
                 BusyIndicator.showWhile(Display.getDefault(), openSearchDialog);
             }
         });
-        FormData fd_btnTimeOccoured = new FormData();
-        fd_btnTimeOccoured.top = new FormAttachment(0, -2);
-        fd_btnTimeOccoured.right = new FormAttachment(50, -5);
-        fd_btnTimeOccoured.width = 25;
-        btnTimeOccoured.setLayoutData(fd_btnTimeOccoured);
         btnTimeOccoured.setText("...");
 
-        textTimeOccoured = new Text(grpTimeInfo, SWT.BORDER);
-        textTimeOccoured.addKeyListener(new KeyAdapter() {
+        lblTimeCleared = new Label(composite, SWT.NONE);
+        lblTimeCleared.setText("Cleared:");
+
+        textTimeCleared = new Text(composite, SWT.BORDER);
+        textTimeCleared.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        textTimeCleared.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 try {
-                    Instant i = LocalDateTime.parse(textTimeOccoured.getText()).atZone(ZoneId.systemDefault()).toInstant();
-                    textTimeOccoured.setForeground(defaultColor);
-                    fault.setFaultOccuredTime(i);
+                    Instant i = LocalDateTime.parse(textTimeCleared.getText()).atZone(ZoneId.systemDefault())
+                            .toInstant();
+                    textTimeCleared.setForeground(defaultColor);
+                    fault.setFaultClearedTime(i);
                 } catch (Exception e1) {
-                    textTimeOccoured.setForeground(redColor);
+                    textTimeCleared.setForeground(redColor);
                 }
             }
         });
-        textTimeOccoured.setToolTipText("example: 2014-11-01T22:07:24");
-        FormData fd_text_1 = new FormData();
-        fd_text_1.right = new FormAttachment(btnTimeOccoured);
-        fd_text_1.top = new FormAttachment(0);
-        fd_text_1.left = new FormAttachment(0, 66);
-        textTimeOccoured.setLayoutData(fd_text_1);
+        textTimeCleared.setToolTipText("example: 2014-11-01T22:07:24");
 
-        lblTimeCleared = new Label(grpTimeInfo, SWT.NONE);
-        FormData fd_lblTimeCleared = new FormData();
-        fd_lblTimeCleared.top = new FormAttachment(lblNewLabel, 0, SWT.TOP);
-        fd_lblTimeCleared.left = new FormAttachment(btnTimeOccoured, 6);
-        lblTimeCleared.setLayoutData(fd_lblTimeCleared);
-        lblTimeCleared.setText("Cleared:");
-
-        btnTimeCleared = new Button(grpTimeInfo, SWT.NONE);
+        btnTimeCleared = new Button(composite, SWT.NONE);
         btnTimeCleared.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -400,41 +329,13 @@ public class FaultEditorWidget extends Composite {
                 BusyIndicator.showWhile(Display.getDefault(), openSearchDialog);
             }
         });
-        FormData fd_btnTimeCleared = new FormData();
-        fd_btnTimeCleared.top = new FormAttachment(0, -2);
-        fd_btnTimeCleared.right = new FormAttachment(100);
-        fd_btnTimeCleared.width = 25;
-        btnTimeCleared.setLayoutData(fd_btnTimeCleared);
         btnTimeCleared.setText("...");
 
-        textTimeCleared = new Text(grpTimeInfo, SWT.BORDER);
-        textTimeCleared.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                try {
-                    Instant i = LocalDateTime.parse(textTimeCleared.getText()).atZone(ZoneId.systemDefault()).toInstant();
-                    textTimeCleared.setForeground(defaultColor);
-                    fault.setFaultClearedTime(i);
-                } catch (Exception e1) {
-                    textTimeCleared.setForeground(redColor);
-                }
-            }
-        });
-        textTimeCleared.setToolTipText("example: 2014-11-01T22:07:24");
-        FormData fd_text_2 = new FormData();
-        fd_text_2.left = new FormAttachment(lblTimeCleared, 4);
-        fd_text_2.right = new FormAttachment(btnTimeCleared);
-        fd_text_2.top = new FormAttachment(0);
-        textTimeCleared.setLayoutData(fd_text_2);
-
-        Label lblBeamlost = new Label(grpTimeInfo, SWT.NONE);
-        fd_lblNewLabel.left = new FormAttachment(lblBeamlost, 0, SWT.LEFT);
-        FormData fd_lblBeamlost = new FormData();
-        fd_lblBeamlost.top = new FormAttachment(btnTimeOccoured, 5);
-        lblBeamlost.setLayoutData(fd_lblBeamlost);
+        Label lblBeamlost = new Label(composite, SWT.NONE);
         lblBeamlost.setText("Beam Lost:*");
 
-        comboBeamLossStatus = new CCombo(grpTimeInfo, SWT.BORDER);
+        comboBeamLossStatus = new CCombo(composite, SWT.BORDER);
+        comboBeamLossStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
         comboBeamLossStatus.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -456,20 +357,31 @@ public class FaultEditorWidget extends Composite {
                 }
             }
         });
+        new Label(composite, SWT.NONE);
+        new Label(composite, SWT.NONE);
+        new Label(composite, SWT.NONE);
 
-        FormData fd_comboBeamLossStatus = new FormData();
-        fd_comboBeamLossStatus.right = new FormAttachment(50, -6);
-        fd_comboBeamLossStatus.top = new FormAttachment(textTimeOccoured, 6);
-        fd_comboBeamLossStatus.left = new FormAttachment(textTimeOccoured, 0, SWT.LEFT);
-        comboBeamLossStatus.setLayoutData(fd_comboBeamLossStatus);
-
-        Label lblBeamLossTime = new Label(grpTimeInfo, SWT.NONE);
+        Label lblBeamLossTime = new Label(composite, SWT.NONE);
         lblBeamLossTime.setText("Start:");
-        FormData fd_lblBeamLossTime = new FormData();
-        fd_lblBeamLossTime.top = new FormAttachment(lblBeamlost, 13);
-        lblBeamLossTime.setLayoutData(fd_lblBeamLossTime);
 
-        btnBeamLossTime = new Button(grpTimeInfo, SWT.NONE);
+        textBeamLossStart = new Text(composite, SWT.BORDER);
+        textBeamLossStart.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        textBeamLossStart.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                try {
+                    Instant i = LocalDateTime.parse(textBeamLossStart.getText()).atZone(ZoneId.systemDefault())
+                            .toInstant();
+                    textBeamLossStart.setForeground(defaultColor);
+                    fault.setBeamlostTime(i);
+                } catch (Exception e1) {
+                    textBeamLossStart.setForeground(redColor);
+                }
+            }
+        });
+        textBeamLossStart.setToolTipText("example: 2014-11-01T22:07:24");
+
+        btnBeamLossTime = new Button(composite, SWT.NONE);
         btnBeamLossTime.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -505,41 +417,29 @@ public class FaultEditorWidget extends Composite {
                 BusyIndicator.showWhile(Display.getDefault(), openSearchDialog);
             }
         });
-        FormData fd_btnLossTimeStart1 = new FormData();
-        fd_btnLossTimeStart1.top = new FormAttachment(btnTimeOccoured, 28);
-        fd_btnLossTimeStart1.width = 25;
-        fd_btnLossTimeStart1.right = new FormAttachment(50, -5);
-        btnBeamLossTime.setLayoutData(fd_btnLossTimeStart1);
         btnBeamLossTime.setText("...");
 
-        textBeamLossStart = new Text(grpTimeInfo, SWT.BORDER);
-        textBeamLossStart.addKeyListener(new KeyAdapter() {
+        lblRestored = new Label(composite, SWT.NONE);
+        lblRestored.setText("Restored:");
+
+        textBeamRestoredTime = new Text(composite, SWT.BORDER);
+        textBeamRestoredTime.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        textBeamRestoredTime.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 try {
-                    Instant i = LocalDateTime.parse(textBeamLossStart.getText()).atZone(ZoneId.systemDefault()).toInstant();
-                    textBeamLossStart.setForeground(defaultColor);
-                    fault.setBeamlostTime(i);
+                    Instant i = LocalDateTime.parse(textBeamRestoredTime.getText()).atZone(ZoneId.systemDefault())
+                            .toInstant();
+                    textBeamRestoredTime.setForeground(defaultColor);
+                    fault.setBeamRestoredTime(i);
                 } catch (Exception e1) {
-                    textBeamLossStart.setForeground(redColor);
+                    textBeamRestoredTime.setForeground(redColor);
                 }
             }
         });
-        textBeamLossStart.setToolTipText("example: 2014-11-01T22:07:24");
-        FormData fd_textBeamLossStart = new FormData();
-        fd_textBeamLossStart.top = new FormAttachment(textTimeOccoured, 32);
-        fd_textBeamLossStart.right = new FormAttachment(btnBeamLossTime);
-        fd_textBeamLossStart.left = new FormAttachment(0, 66);
-        textBeamLossStart.setLayoutData(fd_textBeamLossStart);
+        textBeamRestoredTime.setToolTipText("example: 2014-11-01T22:07:24");
 
-        lblRestored = new Label(grpTimeInfo, SWT.NONE);
-        FormData fd_lblRestored = new FormData();
-        fd_lblRestored.left = new FormAttachment(btnBeamLossTime, 5);
-        fd_lblRestored.top = new FormAttachment(lblBeamLossTime, 0, SWT.TOP);
-        lblRestored.setLayoutData(fd_lblRestored);
-        lblRestored.setText("Restored:");
-
-        btnBeamRestoredTime = new Button(grpTimeInfo, SWT.NONE);
+        btnBeamRestoredTime = new Button(composite, SWT.NONE);
         btnBeamRestoredTime.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -575,140 +475,80 @@ public class FaultEditorWidget extends Composite {
                 BusyIndicator.showWhile(Display.getDefault(), openSearchDialog);
             }
         });
-        FormData fd_btnBeamRestoredTime = new FormData();
-        fd_btnBeamRestoredTime.top = new FormAttachment(btnBeamLossTime, 0, SWT.TOP);
-        fd_btnBeamRestoredTime.right = new FormAttachment(100);
-        fd_btnBeamRestoredTime.width = 25;
-        btnBeamRestoredTime.setLayoutData(fd_btnBeamRestoredTime);
         btnBeamRestoredTime.setText("...");
 
-        textBeamRestoredTime = new Text(grpTimeInfo, SWT.BORDER);
-        textBeamRestoredTime.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                try {
-                    Instant i = LocalDateTime.parse(textBeamRestoredTime.getText()).atZone(ZoneId.systemDefault()).toInstant();
-                    textBeamRestoredTime.setForeground(defaultColor);
-                    fault.setBeamRestoredTime(i);
-                } catch (Exception e1) {
-                    textBeamRestoredTime.setForeground(redColor);
-                }
-            }
-        });
-        textBeamRestoredTime.setToolTipText("example: 2014-11-01T22:07:24");
-        FormData fd_textBeamRestoredTime = new FormData();
-        fd_textBeamRestoredTime.top = new FormAttachment(textBeamLossStart, 0, SWT.TOP);
-        fd_textBeamRestoredTime.right = new FormAttachment(btnBeamRestoredTime);
-        fd_textBeamRestoredTime.left = new FormAttachment(lblRestored);
-        textBeamRestoredTime.setLayoutData(fd_textBeamRestoredTime);
+        labelComments = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+        labelComments.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 6, 1));
+        labelComments.setText("Comments:");
 
-        Group grpComments = new Group(composite, SWT.NONE);
-        grpComments.setText("Comments:");
-        grpComments.setLayout(new FormLayout());
-        FormData fd_grpComments = new FormData();
-        fd_grpComments.bottom = new FormAttachment(75);
-        fd_grpComments.top = new FormAttachment(grpTimeInfo, 2);
-        fd_grpComments.left = new FormAttachment(0, 1);
-        fd_grpComments.right = new FormAttachment(100, -1);
-        grpComments.setLayoutData(fd_grpComments);
+        Label lblCause = new Label(composite, SWT.NONE);
+        lblCause.setText("Cause:");
 
-        textCause = new Text(grpComments, SWT.BORDER);
+        textCause = new Text(composite, SWT.BORDER);
+        textCause.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 2));
         textCause.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
                 fault.setRootCause(textCause.getText());
             }
         });
-        FormData fd_textCause = new FormData();
-        fd_textCause.bottom = new FormAttachment(33);
-        fd_textCause.right = new FormAttachment(100, -6);
-        fd_textCause.top = new FormAttachment(0, 5);
-        fd_textCause.left = new FormAttachment(0, 74);
-        textCause.setLayoutData(fd_textCause);
+        new Label(composite, SWT.NONE);
 
-        textRepair = new Text(grpComments, SWT.BORDER);
+        Label lblRepair = new Label(composite, SWT.NONE);
+        lblRepair.setText("Repair:");
+
+        textRepair = new Text(composite, SWT.BORDER);
+        textRepair.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 2));
         textRepair.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
                 fault.setRepairAction(textRepair.getText());
             }
         });
-        FormData fd_textRepair = new FormData();
-        fd_textRepair.bottom = new FormAttachment(66);
-        fd_textRepair.top = new FormAttachment(textCause, 2);
-        fd_textRepair.right = new FormAttachment(100, -6);
-        fd_textRepair.left = new FormAttachment(0, 74);
-        textRepair.setLayoutData(fd_textRepair);
+        new Label(composite, SWT.NONE);
 
-        textCorrectiveAction = new Text(grpComments, SWT.BORDER);
+        Label lblCorrectiveAction = new Label(composite, SWT.NONE);
+        lblCorrectiveAction.setText("Corrective:");
+
+        textCorrectiveAction = new Text(composite, SWT.BORDER);
+        textCorrectiveAction.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 2));
         textCorrectiveAction.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
                 fault.setCorrectiveAction(textCorrectiveAction.getText());
             }
         });
-        FormData fd_textCorrectiveAction = new FormData();
-        fd_textCorrectiveAction.top = new FormAttachment(textRepair, 2);
-        fd_textCorrectiveAction.bottom = new FormAttachment(100, -2);
-        fd_textCorrectiveAction.right = new FormAttachment(100, -6);
-        fd_textCorrectiveAction.left = new FormAttachment(0, 74);
-        textCorrectiveAction.setLayoutData(fd_textCorrectiveAction);
+        new Label(composite, SWT.NONE);
 
-        Label lblCause = new Label(grpComments, SWT.NONE);
-        FormData fd_lblCause = new FormData();
-        fd_lblCause.top = new FormAttachment(textCause, 0, SWT.TOP);
-        lblCause.setLayoutData(fd_lblCause);
-        lblCause.setText("Cause:");
+        labelLogs = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+        labelLogs.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 6, 1));
+        labelLogs.setText("Logs");
 
-        Label lblRepair = new Label(grpComments, SWT.NONE);
-        FormData fd_lblRepair = new FormData();
-        fd_lblRepair.top = new FormAttachment(textRepair, 0, SWT.TOP);
-        lblRepair.setLayoutData(fd_lblRepair);
-        lblRepair.setText("Repair:");
+        lblLogIds = new Label(composite, SWT.NONE);
+        lblLogIds.setText("Log Ids:");
 
-        Label lblCorrectiveAction = new Label(grpComments, SWT.NONE);
-        FormData fd_lblCorrectiveAction = new FormData();
-        fd_lblCorrectiveAction.top = new FormAttachment(textCorrectiveAction, 0, SWT.TOP);
-        lblCorrectiveAction.setLayoutData(fd_lblCorrectiveAction);
-        lblCorrectiveAction.setText("Corrective:");
-
-        grpLogs = new Group(composite, SWT.NONE);
-        grpLogs.setText("Logs:");
-        grpLogs.setLayout(new FormLayout());
-        FormData fd_grpLogs = new FormData();
-        fd_grpLogs.bottom = new FormAttachment(grpComments, 80, SWT.BOTTOM);
-        fd_grpLogs.right = new FormAttachment(100, -1);
-        fd_grpLogs.top = new FormAttachment(grpComments, 2);
-        fd_grpLogs.left = new FormAttachment(0, 1);
-        grpLogs.setLayoutData(fd_grpLogs);
-
-        textLogIds = new Text(grpLogs, SWT.BORDER);
+        textLogIds = new Text(composite, SWT.BORDER);
+        textLogIds.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1));
         textLogIds.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 fault.setLogIds(Arrays.asList(textLogIds.getText().split(";")).stream().map(Integer::valueOf)
-                        .collect(Collectors.toList())); 
+                        .collect(Collectors.toList()));
             }
         });
-        FormData fd_textLogIds = new FormData();
-        fd_textLogIds.right = new FormAttachment(100, -6);
-        fd_textLogIds.top = new FormAttachment(0, 5);
-        fd_textLogIds.left = new FormAttachment(0, 74);
-        textLogIds.setLayoutData(fd_textLogIds);
 
-        lblLogIds = new Label(grpLogs, SWT.NONE);
-        FormData fd_lblLogIds = new FormData();
-        fd_lblLogIds.top = new FormAttachment(textLogIds, 0, SWT.TOP);
-        fd_lblLogIds.left = new FormAttachment(0);
-        lblLogIds.setLayoutData(fd_lblLogIds);
-        lblLogIds.setText("Log Ids:");
+        lblLogbooks = new Label(composite, SWT.NONE);
+        lblLogbooks.setText("Logbooks:");
 
-        btnLogbooks = new Button(grpLogs, SWT.NONE);
-        FormData fd_btnLogbooks = new FormData();
-        fd_btnLogbooks.right = new FormAttachment(50);
-        fd_btnLogbooks.width = 25;
-        fd_btnLogbooks.top = new FormAttachment(textLogIds, 6);
-        btnLogbooks.setLayoutData(fd_btnLogbooks);
+        multiSelectionComboLogbook = new MultipleSelectionCombo<String>(composite, SWT.NONE);
+        multiSelectionComboLogbook.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+        multiSelectionComboLogbook.addPropertyChangeListener(e -> {
+            if (e.getPropertyName().equals("selection")) {
+                logbooks = multiSelectionComboLogbook.getSelection();
+            }
+        });
+
+        btnLogbooks = new Button(composite, SWT.NONE);
         btnLogbooks.setText("...");
         btnLogbooks.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -723,12 +563,18 @@ public class FaultEditorWidget extends Composite {
             }
         });
 
-        btnTags = new Button(grpLogs, SWT.NONE);
-        FormData fd_btnTags = new FormData();
-        fd_btnTags.right = new FormAttachment(100, -6);
-        fd_btnTags.top = new FormAttachment(textLogIds, 6);
-        fd_btnTags.width = 25;
-        btnTags.setLayoutData(fd_btnTags);
+        lblTags = new Label(composite, SWT.NONE);
+        lblTags.setText("Tags:");
+
+        multiSelectionComboTag = new MultipleSelectionCombo<String>(composite, SWT.NONE);
+        multiSelectionComboTag.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+        multiSelectionComboTag.addPropertyChangeListener(e -> {
+            if (e.getPropertyName().equals("selection")) {
+                tags = multiSelectionComboTag.getSelection();
+            }
+        });
+
+        btnTags = new Button(composite, SWT.NONE);
         btnTags.setText("...");
         btnTags.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -740,44 +586,6 @@ public class FaultEditorWidget extends Composite {
                     tags = dialog.getSelectedValues();
                     multiSelectionComboTag.setSelection(dialog.getSelectedValues());
                 }
-            }
-        });
-
-        lblLogbooks = new Label(grpLogs, SWT.NONE);
-        FormData fd_lblLogbooks = new FormData();
-        fd_lblLogbooks.top = new FormAttachment(textLogIds, 6);
-        fd_lblLogbooks.left = new FormAttachment(0);
-        lblLogbooks.setLayoutData(fd_lblLogbooks);
-        lblLogbooks.setText("Logbooks:");
-
-        lblTags = new Label(grpLogs, SWT.NONE);
-        FormData fd_lblTags = new FormData();
-        fd_lblTags.top = new FormAttachment(textLogIds, 6);
-        fd_lblTags.left = new FormAttachment(btnLogbooks, 6);
-        lblTags.setLayoutData(fd_lblTags);
-        lblTags.setText("Tags:");
-
-        multiSelectionComboLogbook = new MultipleSelectionCombo<String>(grpLogs, SWT.NONE);
-        FormData fd_multiSelectionComboLogbook = new FormData();
-        fd_multiSelectionComboLogbook.right = new FormAttachment(btnLogbooks, -3);
-        fd_multiSelectionComboLogbook.top = new FormAttachment(textLogIds, 3);
-        fd_multiSelectionComboLogbook.left = new FormAttachment(0, 74);
-        multiSelectionComboLogbook.setLayoutData(fd_multiSelectionComboLogbook);
-        multiSelectionComboLogbook.addPropertyChangeListener(e -> {
-            if (e.getPropertyName().equals("selection")) {
-                logbooks = multiSelectionComboLogbook.getSelection();
-            }
-        });
-
-        multiSelectionComboTag = new MultipleSelectionCombo<String>(grpLogs, SWT.NONE);
-        FormData fd_multiSelectionComboTag = new FormData();
-        fd_multiSelectionComboTag.left = new FormAttachment(btnLogbooks, 74);
-        fd_multiSelectionComboTag.right = new FormAttachment(btnTags, -3);
-        fd_multiSelectionComboTag.top = new FormAttachment(textLogIds, 3);
-        multiSelectionComboTag.setLayoutData(fd_multiSelectionComboTag);
-        multiSelectionComboTag.addPropertyChangeListener(e -> {
-            if (e.getPropertyName().equals("selection")) {
-                tags = multiSelectionComboTag.getSelection();
             }
         });
         initialize();
@@ -806,6 +614,9 @@ public class FaultEditorWidget extends Composite {
     private Fault fault = new Fault();
     private List<String> logbooks = Collections.emptyList();
     private List<String> tags = Collections.emptyList();
+    private Label labelTime;
+    private Label labelComments;
+    private Label labelLogs;
 
     /**
      * 
@@ -825,7 +636,7 @@ public class FaultEditorWidget extends Composite {
         comboAssign.setText(fault.getAssigned() != null ? fault.getAssigned() : "");
         textContact.setText(fault.getContact() != null ? fault.getContact() : "");
 
-        if(fault.getFaultOccuredTime() == null){
+        if (fault.getFaultOccuredTime() == null) {
             fault.setFaultOccuredTime(Instant.now());
         }
         textTimeOccoured.setText(fault.getFaultOccuredTime() != null
@@ -869,7 +680,7 @@ public class FaultEditorWidget extends Composite {
 
         textLogIds.setText(String.join(";",
                 fault.getLogIds().stream().sorted().map(String::valueOf).collect(Collectors.toList())));
-        
+
         multiSelectionComboLogbook.setSelection(logbooks);
         multiSelectionComboTag.setSelection(tags);
     }
