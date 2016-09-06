@@ -19,8 +19,11 @@ Require-Bundle: org.eclipse.ui,
  org.jfxtras.common;bundle-version="8.0.0",
  org.csstudio.logbook.viewer;bundle-version="1.0.0",
  edu.msu.nscl.olog.api,
- org.csstudio.email.ui
+ org.csstudio.email.ui,
+ org.diirt.util,
+ org.eclipse.swt
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Import-Package: org.eclipse.ui.part
+Import-Package: com.google.common.base,
+ org.eclipse.ui.part

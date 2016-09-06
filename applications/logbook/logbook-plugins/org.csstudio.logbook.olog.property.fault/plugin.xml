@@ -9,7 +9,7 @@
                id="org.csstudio.logbook.ui.toolbar">
             <command
                   commandId="org.csstudio.logbook.olog.property.fault.OpenNewFaultDialog"
-                  icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-16.png"
+                  icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-add-16.png"
                   label="Create New Fault Report"
                   style="push">
             </command>
@@ -20,8 +20,13 @@
             locationURI="menu:utility?after=additions">
          <command
                commandId="org.csstudio.logbook.olog.property.fault.OpenNewFaultDialog"
-               icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-16.png"
+               icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-add-16.png"
                label="Create New Fault Report"
+               style="push">
+         </command>
+         <command
+               commandId="org.eclipse.ui.views.showView"
+               icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-table-16.png"
                style="push">
          </command>
       </menuContribution>
@@ -30,7 +35,7 @@
             locationURI="popup:org.eclipse.ui.popup.any?after=org.csstudio.logbook.ui.separator">
          <command
                commandId="org.csstudio.logbook.olog.property.fault.OpenNewFaultDialog"
-               icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-16.png"
+               icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-add-16.png"
                label="Create Fault Report"
                style="push">
             <visibleWhen>
@@ -54,7 +59,7 @@
          </command>
          <command
                commandId="org.csstudio.logbook.olog.property.fault.OpenFaultEditorDialog"
-               icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-16.png"
+               icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-edit-16.png"
                label="Update Fault Report"
                style="push">
             <visibleWhen>
@@ -78,6 +83,7 @@
          </command>
          <command
                commandId="org.csstudio.logbook.olog.property.fault.OpenFaultDetail"
+               icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-info-16.png"
                style="push">
             <visibleWhen>
                <with
@@ -100,6 +106,7 @@
          </command>
          <command
                commandId="org.csstudio.logbook.olog.property.fault.EmailFault"
+               icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-send-16.png"
                style="push">
             <visibleWhen>
                <with
@@ -122,6 +129,7 @@
          </command>
          <command
                commandId="org.csstudio.logbook.olog.property.fault.ExportFault"
+               icon="platform:/plugin/org.csstudio.logbook.olog.property.fault/icons/fault-send-16.png"
                style="push">
             <visibleWhen>
                <with

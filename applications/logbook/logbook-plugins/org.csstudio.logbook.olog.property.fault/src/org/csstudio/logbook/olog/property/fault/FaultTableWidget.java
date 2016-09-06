@@ -1,7 +1,5 @@
 package org.csstudio.logbook.olog.property.fault;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -12,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.csstudio.logbook.LogEntry;
 import org.csstudio.logbook.LogbookClient;
@@ -22,6 +21,7 @@ import org.csstudio.logbook.ui.PeriodicLogQuery;
 import org.csstudio.logbook.ui.PeriodicLogQuery.LogResult;
 import org.csstudio.ui.util.AbstractSelectionProviderWrapper;
 import org.csstudio.ui.util.composites.BeanComposite;
+import org.diirt.util.time.TimeInterval;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -294,17 +294,6 @@ public class FaultTableWidget extends BeanComposite implements ISelectionProvide
         tblclmnDescColumn.setWidth(100);
         tblclmnDescColumn.setText("Desc");
 
-        addPropertyChangeListener(new PropertyChangeListener() {
-            
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                evt.getPropertyName().equals("faults");
-                Display.getDefault().asyncExec(() -> {
-                    tableViewer.setInput(faults.toArray());
-                });
-            }
-        });
-
         selectionProvider = new AbstractSelectionProviderWrapper(tableViewer, this) {
 
             @Override
@@ -326,8 +315,49 @@ public class FaultTableWidget extends BeanComposite implements ISelectionProvide
                 e.printStackTrace();
             }
         });
-        
+        changeSupport.addPropertyChangeListener(e -> {
+            String propertyName = e.getPropertyName();
+            List<Fault> filteredFaults;
+            switch (propertyName) {
+            case "faults":
+            case "timeInterval":
+                filteredFaults = faults.stream().filter((Fault f) -> {
+                    return timeInterval.contains(f.getFaultOccuredTime() != null ? f.getFaultOccuredTime() : Instant.MIN)
+                            || timeInterval.contains(f.getFaultClearedTime() != null ? f.getFaultClearedTime() : Instant.MIN)
+                            || timeInterval.contains(f.getBeamlostTime() != null ? f.getBeamlostTime() : Instant.MIN)
+                            || timeInterval.contains(f.getBeamRestoredTime() != null ? f.getBeamRestoredTime() : Instant.MIN);
+                }).collect(Collectors.toList());
+                Display.getDefault().asyncExec(() -> {
+                    tableViewer.setInput(filteredFaults.toArray());
+                });
+                break;
+            case "query":
+                logQuery.setQuery(e.getNewValue().toString()+" property:fault limit:500");
+                break;
+            default:
+                break;
+            }
+        });
 
+    }
+
+    private String query = "property:fault limit:500";
+    private TimeInterval timeInterval = TimeInterval.between(Instant.MIN, Instant.now());
+
+    public void setQuery(String query){
+        Object oldValue = this.query;
+        this.query = query;
+        changeSupport.firePropertyChange("query", oldValue, this.query);
+    }
+
+    public String getQueryString(){
+        return query;
+    }
+
+    public void setFilterTimeInterval(TimeInterval timeInterval) {
+        Object oldValue = this.timeInterval;
+        this.timeInterval = timeInterval;
+        changeSupport.firePropertyChange("timeInterval", oldValue, this.timeInterval);
     }
 
     protected void setFaults(List<Fault> faults) {
