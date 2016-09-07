@@ -6,6 +6,7 @@ import static org.csstudio.logbook.olog.property.fault.FaultAdapter.faultSummary
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -178,10 +179,10 @@ public class FaultCalendar extends FXViewPart {
         // find the css file
         String faultCSS = Platform.getPreferencesService().getString("org.csstudio.logbook.olog.property.fault",
                             "fault.css", "Agenda.css", null);
-        try {            
-            agenda.getStylesheets().add(getClass().getResource("/Agenda.css").toString());
+        try {
+            agenda.getStylesheets().add(getClass().getResource("/resources/Agenda.css").toString());
             agenda.getStylesheets().add(new File(faultCSS).toURI().toURL().toString());
-        } catch (MalformedURLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         appointmentGroupMap = agenda.appointmentGroups().stream()
