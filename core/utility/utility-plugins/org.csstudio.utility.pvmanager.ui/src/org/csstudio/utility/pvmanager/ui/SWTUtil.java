@@ -10,7 +10,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.WorkbenchPart;
+import org.diirt.util.array.ListNumber;
 import org.diirt.vtype.VImage;
+import org.diirt.vtype.VImageType;
 
 public class SWTUtil {
     private SWTUtil() {
@@ -49,9 +51,19 @@ public class SWTUtil {
     }
 
     public static Image toImage(GC gc, VImage vImage) {
-         ImageData imageData = new ImageData(vImage.getWidth(), vImage.getHeight(), 24, new PaletteData(0xFF, 0xFF00, 0xFF0000), vImage.getWidth()*3, vImage.getData());
-         Image image = new Image(gc.getDevice(), imageData);
-         return image;
+        if (vImage.getVImageType() == VImageType.TYPE_3BYTE_BGR) {
+            byte[] data = new byte[vImage.getHeight() * vImage.getWidth() * 3];
+            ListNumber numberData = vImage.getData();
+            for (int i = 0; i < numberData.size(); i++) {
+                data[i] = numberData.getByte(i);
+            }
+            ImageData imageData = new ImageData(vImage.getWidth(), vImage.getHeight(), 24,
+                    new PaletteData(0xFF, 0xFF00, 0xFF0000), vImage.getWidth() * 3, data);
+            Image image = new Image(gc.getDevice(), imageData);
+            return image;
+        } else {
+            return null;
+        }
     }
 
 }
