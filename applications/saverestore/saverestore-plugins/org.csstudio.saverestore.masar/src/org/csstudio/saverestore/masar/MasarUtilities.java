@@ -165,6 +165,10 @@ public final class MasarUtilities {
     static final Pattern deltaPattern = Pattern.compile("DELTA:([\\S]*);");
     /**
      * Transform the result structure of <code>loadServiceConfig</code> call to a list of save set entries.
+<<<<<<< HEAD
+=======
+     * 
+>>>>>>> refs/heads/clean-masar
      * @param result PVStructure from the loadServiceConfig
      * @return A list of {@link SaveSetEntry}
      */
@@ -290,7 +294,11 @@ public final class MasarUtilities {
                 ScalarType.pvString);
         PVStringArray pvtags = (PVStringArray) result.getScalarArrayField(MasarConstants.P_SNAPSHOT_TAG,
                 ScalarType.pvString);
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> refs/heads/clean-masar
         StringArrayData pvName = new StringArrayData();
         pvPVName.get(0, pvPVName.getLength(), pvName);
         StringArrayData alarmMessage = new StringArrayData();
